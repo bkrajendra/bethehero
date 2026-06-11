@@ -3,9 +3,11 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth/server";
 import { getAttendeeById, adminUpdateAttendee } from "@/lib/db/queries/attendees";
-import { enqueueNotification } from "@/lib/db/queries/notifications";
 import { writeAuditLog } from "@/lib/db/queries/audit";
 import { nanoid } from "nanoid";
+import { sendEmail } from "@/lib/email/ses";
+import { thankYouEmailHtml } from "@/lib/email/templates/thank-you";
+import { feedbackRequestEmailHtml } from "@/lib/email/templates/feedback-request";
 
 const VALID_GROUPS = ["A+","A-","B+","B-","AB+","AB-","O+","O-"] as const;
 
@@ -56,16 +58,27 @@ export async function markDonatedAction(formData: FormData): Promise<{ error?: s
       certificateIssuedAt: new Date(),
     });
 
-    await enqueueNotification({
-      attendeeId, type: "thank_you", channel: "email",
-      scheduledAt: new Date(),
-      dedupeKey: `thank-you-email-${attendeeId}`,
-    });
-    await enqueueNotification({
-      attendeeId, type: "feedback_request", channel: "email",
-      scheduledAt: new Date(Date.now() + 2 * 60 * 60 * 1000),
-      dedupeKey: `feedback-email-${attendeeId}`,
-    });
+    // Send thank-you and feedback emails immediately
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
+    if (attendee.donor?.email && attendee.event) {
+      const certUrl = `${appUrl}/certificate/${attendee.id}`;
+      const feedbackUrl = `${appUrl}/feedback/${attendeeId}`;
+      sendEmail({
+        to: attendee.donor.email,
+        subject: "Thank you for donating blood — you're a hero!",
+        html: thankYouEmailHtml({
+          fullName: attendee.donor.fullName,
+          eventName: attendee.event.name,
+          certificateUrl: certUrl,
+          appUrl,
+        }),
+      }).catch((err) => console.error("[markDonated] thank-you email failed:", err));
+      sendEmail({
+        to: attendee.donor.email,
+        subject: "How was your donation experience?",
+        html: feedbackRequestEmailHtml({ fullName: attendee.donor.fullName, feedbackUrl }),
+      }).catch((err) => console.error("[markDonated] feedback email failed:", err));
+    }
 
     await writeAuditLog({ actorAdminId: adminId, action: "mark_donated", targetTable: "event_attendees", targetId: attendeeId, metadata: { certificateNumber } });
     revalidatePath("/admin/attendees");

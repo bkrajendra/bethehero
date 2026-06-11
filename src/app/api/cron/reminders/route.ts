@@ -2,17 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { and, eq, lte, gte } from "drizzle-orm";
 import { db } from "@/lib/db/index";
 import { eventAttendees, events } from "@/lib/db/schema";
-import {
-  enqueueNotification,
-  getPendingNotifications,
-  markNotificationSent,
-  markNotificationFailed,
-} from "@/lib/db/queries/notifications";
+import { enqueueNotification, getPendingNotifications, markNotificationSent, markNotificationFailed } from "@/lib/db/queries/notifications";
 import { sendEmail } from "@/lib/email/ses";
-import { confirmationEmailHtml } from "@/lib/email/templates/confirmation";
 import { reminderEmailHtml } from "@/lib/email/templates/reminder";
-import { thankYouEmailHtml } from "@/lib/email/templates/thank-you";
-import { feedbackRequestEmailHtml } from "@/lib/email/templates/feedback-request";
 import { sendPushNotification } from "@/lib/push/send";
 import { getPushSubscriptionsByDonor } from "@/lib/push/subscriptions";
 
@@ -66,12 +58,19 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  // ── Step 2: Drain all pending notification jobs ───────────────────────────
+  // ── Step 2: Send reminder_day_before jobs (only type handled by cron) ──────
   const pending = await getPendingNotifications();
   let sent = 0;
   let failed = 0;
 
   for (const job of pending) {
+    if (job.type !== "reminder_day_before") {
+      // Confirmation, thank_you, feedback_request are sent directly at action time
+      await markNotificationFailed(job.id, "Stale queued job — sent directly at action time");
+      failed++;
+      continue;
+    }
+
     const { attendee } = job;
     if (!attendee || !attendee.donor || !attendee.event) {
       await markNotificationFailed(job.id, "Attendee, donor, or event was deleted");
@@ -82,105 +81,30 @@ export async function GET(req: NextRequest) {
 
     try {
       if (job.channel === "email") {
-        let html = "";
-        let subject = "";
-
-        switch (job.type) {
-          case "confirmation": {
-            subject = `You're registered for ${event.name}!`;
-            html = confirmationEmailHtml({
-              fullName:        donor.fullName,
-              eventName:       event.name,
-              venue:           event.venue,
-              address:         event.address,
-              startAt:         event.startAt,
-              badgeToken:      attendee.badgeToken,
-              loginUrl:        `${APP_URL}/donor/dashboard`,
-              instructionsDos:   (event.instructionsDos as string[] | null) ?? [],
-              instructionsDonts: (event.instructionsDonts as string[] | null) ?? [],
-              appUrl: APP_URL,
-            });
-            break;
-          }
-          case "reminder_day_before": {
-            subject = `Reminder: ${event.name} is tomorrow!`;
-            html = reminderEmailHtml({
-              fullName:   donor.fullName,
-              eventName:  event.name,
-              venue:      event.venue,
-              startAt:    event.startAt,
-              badgeToken: attendee.badgeToken,
-              appUrl:     APP_URL,
-            });
-            break;
-          }
-          case "thank_you": {
-            subject = "Thank you for donating blood — you're a hero!";
-            const certUrl = attendee.certificateNumber
-              ? `${APP_URL}/certificate/${attendee.badgeToken}`
-              : `${APP_URL}/donor/dashboard`;
-            html = thankYouEmailHtml({
-              fullName:       donor.fullName,
-              eventName:      event.name,
-              certificateUrl: certUrl,
-              appUrl:         APP_URL,
-            });
-            break;
-          }
-          case "feedback_request": {
-            subject = "How was your donation experience?";
-            html = feedbackRequestEmailHtml({
-              fullName:    donor.fullName,
-              feedbackUrl: `${APP_URL}/feedback/${attendee.badgeToken}`,
-            });
-            break;
-          }
-          default:
-            await markNotificationFailed(job.id, `Unknown job type: ${job.type}`);
-            failed++;
-            continue;
-        }
-
-        await sendEmail({ to: donor.email, subject, html });
-
+        await sendEmail({
+          to: donor.email,
+          subject: `Reminder: ${event.name} is tomorrow!`,
+          html: reminderEmailHtml({
+            fullName:   donor.fullName,
+            eventName:  event.name,
+            venue:      event.venue,
+            startAt:    event.startAt,
+            badgeToken: attendee.badgeToken,
+            appUrl:     APP_URL,
+          }),
+        });
       } else if (job.channel === "push") {
         const subscriptions = await getPushSubscriptionsByDonor(donor.id);
-        if (subscriptions.length === 0) {
-          await markNotificationSent(job.id);
-          sent++;
-          continue;
-        }
-
-        let title = "BeTheHero";
-        let body = "";
-        let url = `${APP_URL}/donor/dashboard`;
-
-        switch (job.type) {
-          case "confirmation":
-            title = "Registration Confirmed!";
-            body  = `You're registered for ${event.name}.`;
-            url   = `${APP_URL}/badge/${attendee.badgeToken}`;
-            break;
-          case "reminder_day_before":
-            title = "Donation Drive Tomorrow!";
-            body  = `${event.name} is tomorrow at ${event.venue}. Don't forget!`;
-            url   = `${APP_URL}/badge/${attendee.badgeToken}`;
-            break;
-          case "thank_you":
-            title = "You're a Hero!";
-            body  = "Thank you for donating blood. Download your certificate!";
-            url   = `${APP_URL}/certificate/${attendee.badgeToken}`;
-            break;
-          case "feedback_request":
-            title = "Share Your Experience";
-            body  = "How was the donation drive? Take 2 mins to give feedback.";
-            url   = `${APP_URL}/feedback/${attendee.badgeToken}`;
-            break;
-        }
-
         await Promise.all(
           subscriptions.map((sub) =>
-            sendPushNotification({ endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth }, { title, body, url })
+            sendPushNotification(
+              { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth },
+              {
+                title: "Donation Drive Tomorrow!",
+                body:  `${event.name} is tomorrow at ${event.venue}. Don't forget!`,
+                url:   `${APP_URL}/badge/${attendee.badgeToken}`,
+              },
+            )
           )
         );
       }
@@ -195,10 +119,5 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  return NextResponse.json({
-    ok: true,
-    sent,
-    failed,
-    pendingCount: pending.length,
-  });
+  return NextResponse.json({ ok: true, sent, failed, pendingCount: pending.length });
 }

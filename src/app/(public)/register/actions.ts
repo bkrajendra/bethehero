@@ -3,8 +3,9 @@ import { z } from "zod";
 import { upsertDonorByEmail } from "@/lib/db/queries/donors";
 import { getActiveEvent } from "@/lib/db/queries/events";
 import { createAttendee } from "@/lib/db/queries/attendees";
-import { enqueueNotification } from "@/lib/db/queries/notifications";
 import { generateBadgeToken } from "@/lib/qr/generate";
+import { sendEmail } from "@/lib/email/ses";
+import { confirmationEmailHtml } from "@/lib/email/templates/confirmation";
 
 const RegisterSchema = z.object({
   email:        z.string().email().toLowerCase(),
@@ -67,13 +68,24 @@ export async function registerDonor(formData: FormData): Promise<RegisterResult>
     status:     "registered",
   });
 
-  await enqueueNotification({
-    attendeeId:  attendee.id,
-    type:        "confirmation",
-    channel:     "email",
-    scheduledAt: new Date(),
-    dedupeKey:   `confirmation-email-${attendee.id}`,
-  });
+  // Send confirmation email immediately — no queue needed
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
+  sendEmail({
+    to: data.email,
+    subject: `You're registered for ${event.name}!`,
+    html: confirmationEmailHtml({
+      fullName:          data.fullName,
+      eventName:         event.name,
+      venue:             event.venue,
+      address:           event.address,
+      startAt:           new Date(event.startAt),
+      badgeToken,
+      loginUrl:          `${appUrl}/login`,
+      instructionsDos:   (event.instructionsDos as string[] | null) ?? [],
+      instructionsDonts: (event.instructionsDonts as string[] | null) ?? [],
+      appUrl,
+    }),
+  }).catch((err) => console.error("[register] confirmation email failed:", err));
 
   return { type: "success", attendeeId: attendee.id, badgeToken, eventId: event.id };
 }
