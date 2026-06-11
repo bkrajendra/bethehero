@@ -50,7 +50,8 @@ export async function createAttendee(data: NewAttendee) {
   return attendee;
 }
 
-export async function updateAttendee(id: string, data: Partial<NewAttendee>) {
+/** Admin-only: update any attendee by ID. Only call from requireAdmin() contexts. */
+export async function adminUpdateAttendee(id: string, data: Partial<NewAttendee>) {
   const [updated] = await db
     .update(eventAttendees)
     .set({ ...data, updatedAt: new Date() })
@@ -58,3 +59,6 @@ export async function updateAttendee(id: string, data: Partial<NewAttendee>) {
     .returning();
   return updated;
 }
+
+/** @deprecated Use adminUpdateAttendee explicitly */
+export const updateAttendee = adminUpdateAttendee;

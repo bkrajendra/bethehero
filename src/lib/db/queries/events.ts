@@ -19,9 +19,11 @@ export async function getAppSettings() {
 export async function setActiveEvent(eventId: string) {
   const settings = await db.query.appSettings.findFirst();
   if (settings) {
-    await db.update(appSettings).set({ currentEventId: eventId, updatedAt: new Date() });
+    await db.update(appSettings)
+      .set({ currentEventId: eventId, updatedAt: new Date() })
+      .where(eq(appSettings.id, settings.id));
   } else {
-    await db.insert(appSettings).values({ currentEventId: eventId });
+    await db.insert(appSettings).values({ key: "singleton", currentEventId: eventId });
   }
 }
 

@@ -27,6 +27,7 @@ async function seed() {
   console.log("✓ Event created:", event.id);
 
   await db.insert(appSettings).values({
+    key: "singleton",
     currentEventId: event.id,
     defaultInstructionsDos: ["Eat well", "Stay hydrated", "Sleep well"],
     defaultInstructionsDonts: ["No alcohol", "No smoking", "Not on empty stomach"],

@@ -16,6 +16,8 @@ export async function GET(request: NextRequest) {
       if (donor && !donor.authUserId) {
         await linkDonorToAuthUser(donor.id, user.id);
       }
+    } else if (error) {
+      return NextResponse.redirect(`${origin}/login?error=auth_failed`);
     }
   }
 

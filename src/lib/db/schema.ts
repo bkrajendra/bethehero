@@ -73,9 +73,9 @@ export const eventAttendees = pgTable("event_attendees", {
   donationVolumeMl:    integer("donation_volume_ml"),
   deferralReason:      text("deferral_reason"),
   checkedInAt:         timestamp("checked_in_at", { withTimezone: true }),
-  checkedInBy:         uuid("checked_in_by"),
+  checkedInBy:         uuid("checked_in_by").references(() => admins.id),
   donatedAt:           timestamp("donated_at", { withTimezone: true }),
-  markedBy:            uuid("marked_by"),
+  markedBy:            uuid("marked_by").references(() => admins.id),
   certificateNumber:   text("certificate_number").unique(),
   certificateIssuedAt: timestamp("certificate_issued_at", { withTimezone: true }),
   createdAt:           timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
@@ -149,6 +149,7 @@ export const auditLog = pgTable("audit_log", {
 // ── app_settings ─────────────────────────────────────
 export const appSettings = pgTable("app_settings", {
   id:                       uuid("id").primaryKey().defaultRandom(),
+  key:                      text("key").notNull().unique().default("singleton"),
   currentEventId:           uuid("current_event_id").references(() => events.id),
   defaultInstructionsDos:   jsonb("default_instructions_dos"),
   defaultInstructionsDonts: jsonb("default_instructions_donts"),
