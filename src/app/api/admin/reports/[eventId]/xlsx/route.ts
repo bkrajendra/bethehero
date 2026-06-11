@@ -28,7 +28,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ eve
 
     const buffer = await buildEventXlsx(event.name, attendees, kpis);
 
-    return new NextResponse(buffer, {
+    return new NextResponse(new Uint8Array(buffer), {
       headers: {
         "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         "Content-Disposition": `attachment; filename="report-${event.name.replace(/\s+/g,"-")}.xlsx"`,

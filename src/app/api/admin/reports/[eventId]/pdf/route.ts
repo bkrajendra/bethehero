@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth/server";
 import { getEventById } from "@/lib/db/queries/events";
 import { getAttendeesByEvent } from "@/lib/db/queries/attendees";
-import { renderToBuffer } from "@react-pdf/renderer";
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { renderToBuffer } = require("@react-pdf/renderer") as { renderToBuffer: (el: unknown) => Promise<Buffer> };
 import { createElement } from "react";
 import { EventReportPDF } from "@/lib/reports/pdf";
 
@@ -43,7 +44,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ eve
       }),
     );
 
-    return new NextResponse(buffer, {
+    return new NextResponse(new Uint8Array(buffer), {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": `attachment; filename="report-${event.name.replace(/\s+/g,"-")}.pdf"`,
