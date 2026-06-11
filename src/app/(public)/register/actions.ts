@@ -1,6 +1,6 @@
 "use server";
 import { z } from "zod";
-import { getDonorByEmail, createDonor } from "@/lib/db/queries/donors";
+import { upsertDonorByEmail } from "@/lib/db/queries/donors";
 import { getActiveEvent } from "@/lib/db/queries/events";
 import { createAttendee } from "@/lib/db/queries/attendees";
 import { enqueueNotification } from "@/lib/db/queries/notifications";
@@ -40,20 +40,18 @@ export async function registerDonor(formData: FormData): Promise<RegisterResult>
 
   const data = parsed.data;
 
-  const existing = await getDonorByEmail(data.email);
-  if (existing) return { type: "already_exists" };
-
-  const donor = await createDonor({
+  const { donor, created } = await upsertDonorByEmail({
     email:          data.email,
     mobile:         data.mobile,
     fullName:       data.fullName,
     company:        data.company ?? null,
-    bloodGroup:     (data.bloodGroup as any) ?? null,
+    bloodGroup:     (data.bloodGroup ?? null) as "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-" | null,
     dob:            data.dob ?? null,
     consentGiven:   true,
     consentAt:      new Date(),
     consentVersion: "v1.0",
   });
+  if (!created) return { type: "already_exists" };
 
   const event = await getActiveEvent();
   const now = new Date();

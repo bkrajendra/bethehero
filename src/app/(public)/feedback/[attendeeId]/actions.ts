@@ -28,10 +28,10 @@ export async function submitFeedback(formData: FormData): Promise<{ success?: bo
     if (!attendee || attendee.donorId !== donorId) return { error: "Forbidden" };
     if (attendee.status !== "donated") return { error: "Feedback is only for completed donations" };
 
-    await db.insert(feedback).values(parsed.data).onConflictDoNothing();
+    await db.insert(feedback).values(parsed.data).onConflictDoNothing({ target: feedback.attendeeId });
     return { success: true };
   } catch (e) {
     if (e instanceof AuthError) return { error: e.message };
-    return { error: "Authentication required" };
+    return { error: "Something went wrong. Please try again." };
   }
 }

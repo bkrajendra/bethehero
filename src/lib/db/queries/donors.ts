@@ -23,6 +23,21 @@ export async function createDonor(data: NewDonor) {
   return donor;
 }
 
+/** Insert a new donor, or return existing if email already exists (handles concurrent registration). */
+export async function upsertDonorByEmail(data: NewDonor): Promise<{ donor: Donor; created: boolean }> {
+  const [inserted] = await db
+    .insert(donors)
+    .values(data)
+    .onConflictDoNothing({ target: donors.email })
+    .returning();
+
+  if (inserted) return { donor: inserted, created: true };
+
+  // Row existed — fetch it
+  const existing = await getDonorByEmail(data.email as string);
+  return { donor: existing!, created: false };
+}
+
 export async function linkDonorToAuthUser(donorId: string, authUserId: string) {
   await db
     .update(donors)
