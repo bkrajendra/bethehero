@@ -19,14 +19,18 @@ export async function sendAdminOtp(email: string): Promise<{ error?: string }> {
   return {};
 }
 
+const UNLINKED_AUTH_ID = "00000000-0000-0000-0000-000000000000";
+
 export async function verifyAdminOtp(email: string, token: string): Promise<{ error?: string }> {
   const supabase = await createSupabaseServerClient();
   const { data: { user }, error } = await supabase.auth.verifyOtp({ email, token, type: "email" });
   if (error || !user) return { error: error?.message ?? "Invalid code" };
 
-  const admin = await getAdminByEmail(email);
-  if (admin && admin.authUserId === "00000000-0000-0000-0000-000000000000") {
-    await db.update(admins).set({ authUserId: user.id }).where(eq(admins.id, admin.id));
+  const adminCheck = await getAdminByEmail(email);
+  if (!adminCheck || !adminCheck.active) return { error: "Not authorised. Contact your administrator." };
+
+  if (adminCheck.authUserId === UNLINKED_AUTH_ID) {
+    await db.update(admins).set({ authUserId: user.id }).where(eq(admins.id, adminCheck.id));
   }
   return {};
 }

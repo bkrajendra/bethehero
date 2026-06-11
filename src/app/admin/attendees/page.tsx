@@ -46,9 +46,9 @@ export default async function AttendeesPage() {
           <tbody>
             {attendees.map(a => (
               <tr key={a.id} className="border-b border-[rgba(200,16,46,0.08)] hover:bg-[rgba(200,16,46,0.04)]">
-                <td className="px-4 py-3 font-medium text-[#fdf0ee]">{(a as any).donor.fullName}</td>
-                <td className="px-4 py-3 text-[rgba(253,240,238,0.55)]">{(a as any).donor.company ?? "—"}</td>
-                <td className="px-4 py-3 text-[rgba(253,240,238,0.55)]">{a.bloodGroupAtEvent ?? (a as any).donor.bloodGroup ?? "—"}</td>
+                <td className="px-4 py-3 font-medium text-[#fdf0ee]">{a.donor?.fullName ?? "—"}</td>
+                <td className="px-4 py-3 text-[rgba(253,240,238,0.55)]">{a.donor?.company ?? "—"}</td>
+                <td className="px-4 py-3 text-[rgba(253,240,238,0.55)]">{a.bloodGroupAtEvent ?? a.donor?.bloodGroup ?? "—"}</td>
                 <td className="px-4 py-3">
                   <span className={`text-xs px-2 py-0.5 rounded-full capitalize ${STATUS_COLORS[a.status]}`}>
                     {a.status.replace("_", " ")}

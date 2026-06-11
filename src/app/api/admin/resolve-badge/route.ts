@@ -12,6 +12,7 @@ export async function POST(req: NextRequest) {
 
     const attendee = await getAttendeeByBadgeToken(badgeToken);
     if (!attendee) return NextResponse.json({ error: "Badge not found" }, { status: 404 });
+    if (!attendee.donor) return NextResponse.json({ error: "Donor data missing" }, { status: 500 });
 
     const settings = await getAppSettings();
     if (!settings?.currentEventId) return NextResponse.json({ error: "No active event" }, { status: 400 });
@@ -19,14 +20,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Badge is for a different event" }, { status: 400 });
     }
 
+    const digitsOnly = attendee.donor.mobile.replace(/\D/g, "");
+    const maskedMobile = digitsOnly.length >= 10
+      ? digitsOnly.replace(/(\d{3})\d{4}(\d{3})/, "$1****$2")
+      : "****";
+
     return NextResponse.json({
       attendeeId:  attendee.id,
       donorId:     attendee.donorId,
       status:      attendee.status,
-      fullName:    (attendee as any).donor.fullName,
-      company:     (attendee as any).donor.company,
-      mobile:      (attendee as any).donor.mobile.replace(/(\d{3})\d{4}(\d{3})/, "$1****$2"),
-      bloodGroup:  attendee.bloodGroupAtEvent ?? (attendee as any).donor.bloodGroup,
+      fullName:    attendee.donor.fullName,
+      company:     attendee.donor.company,
+      mobile:      maskedMobile,
+      bloodGroup:  attendee.bloodGroupAtEvent ?? attendee.donor.bloodGroup,
     });
   } catch (e) {
     if (e instanceof AuthError) return NextResponse.json({ error: e.message }, { status: e.status });
