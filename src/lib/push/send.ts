@@ -1,10 +1,14 @@
 import webpush from "web-push";
 
-webpush.setVapidDetails(
-  process.env.VAPID_SUBJECT!,
-  process.env.VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!,
-);
+const subject = process.env.VAPID_SUBJECT;
+const publicKey = process.env.VAPID_PUBLIC_KEY;
+const privateKey = process.env.VAPID_PRIVATE_KEY;
+
+if (!subject || !publicKey || !privateKey) {
+  throw new Error("Missing required VAPID environment variables");
+}
+
+webpush.setVapidDetails(subject, publicKey, privateKey);
 
 export async function sendPushNotification(
   subscription: { endpoint: string; p256dh: string; auth: string },

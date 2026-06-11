@@ -1,11 +1,17 @@
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 
+const region = process.env.AWS_SES_REGION;
+const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
+const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
+const fromEmail = process.env.SES_FROM_EMAIL;
+
+if (!region || !accessKeyId || !secretAccessKey || !fromEmail) {
+  throw new Error("Missing required AWS SES environment variables");
+}
+
 const sesClient = new SESClient({
-  region: process.env.AWS_SES_REGION!,
-  credentials: {
-    accessKeyId:     process.env.AWS_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-  },
+  region,
+  credentials: { accessKeyId, secretAccessKey },
 });
 
 export async function sendEmail(params: {
@@ -15,7 +21,7 @@ export async function sendEmail(params: {
   text?: string;
 }): Promise<void> {
   await sesClient.send(new SendEmailCommand({
-    Source: process.env.SES_FROM_EMAIL!,
+    Source: fromEmail,
     Destination: { ToAddresses: [params.to] },
     Message: {
       Subject: { Data: params.subject, Charset: "UTF-8" },

@@ -18,16 +18,21 @@ import { getPushSubscriptionsByDonor } from "@/lib/push/subscriptions";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://bethehero.in";
 
+function verifyCronSecret(req: NextRequest): boolean {
+  if (!process.env.CRON_SECRET) return false; // fail closed if not configured
+  const auth = req.headers.get("authorization");
+  return auth === `Bearer ${process.env.CRON_SECRET}`;
+}
+
 export async function GET(req: NextRequest) {
   // Verify cron secret
-  const auth = req.headers.get("authorization");
-  if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!verifyCronSecret(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   // ── Step 1: Enqueue reminder_day_before for tomorrow's attendees ──────────
   const now = new Date();
-  const windowStart = new Date(now.getTime());
+  const windowStart = new Date(now.getTime() + 23 * 60 * 60 * 1000);
   const windowEnd   = new Date(now.getTime() + 25 * 60 * 60 * 1000);
 
   const upcomingAttendees = await db.query.eventAttendees.findMany({
@@ -38,10 +43,11 @@ export async function GET(req: NextRequest) {
   });
 
   const tomorrow = upcomingAttendees.filter(
-    (a) => a.event.status === "active" && a.event.startAt >= windowStart && a.event.startAt <= windowEnd,
+    (a) => a.event && a.event.status === "active" && a.event.startAt >= windowStart && a.event.startAt <= windowEnd,
   );
 
   for (const attendee of tomorrow) {
+    if (!attendee.event) continue; // skip if event was deleted
     // email reminder
     await enqueueNotification({
       attendeeId:  attendee.id,
@@ -67,6 +73,11 @@ export async function GET(req: NextRequest) {
 
   for (const job of pending) {
     const { attendee } = job;
+    if (!attendee || !attendee.donor || !attendee.event) {
+      await markNotificationFailed(job.id, "Attendee, donor, or event was deleted");
+      failed++;
+      continue;
+    }
     const { donor, event } = attendee;
 
     try {
