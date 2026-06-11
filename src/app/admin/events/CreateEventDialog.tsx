@@ -36,9 +36,7 @@ export function CreateEventDialog() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="bg-[#c8102e] hover:bg-[#ff2442]">+ Create Event</Button>
-      </DialogTrigger>
+      <DialogTrigger render={<Button className="bg-[#c8102e] hover:bg-[#ff2442]">+ Create Event</Button>} />
       <DialogContent className="bg-[#0a0109] border-[rgba(200,16,46,0.2)] text-[#fdf0ee] max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create New Event</DialogTitle>

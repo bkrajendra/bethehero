@@ -1,6 +1,6 @@
 "use client";
 import { useRef, useState } from "react";
-import { BrowserQRCodeReader } from "@zxing/browser";
+import { BrowserQRCodeReader, IScannerControls } from "@zxing/browser";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { checkInAction, markDonatedAction } from "../attendees/actions";
@@ -19,7 +19,7 @@ const BLOOD_GROUPS = ["A+","A-","B+","B-","AB+","AB-","O+","O-"];
 
 export function ScannerClient() {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const readerRef = useRef<BrowserQRCodeReader | null>(null);
+  const controlsRef = useRef<IScannerControls | null>(null);
   const [scanning, setScanning] = useState(false);
   const [donor, setDonor] = useState<DonorInfo | null>(null);
   const [error, setError] = useState("");
@@ -34,16 +34,15 @@ export function ScannerClient() {
     setSuccessMsg("");
 
     const reader = new BrowserQRCodeReader();
-    readerRef.current = reader;
 
     try {
       const devices = await BrowserQRCodeReader.listVideoInputDevices();
       const deviceId = devices[devices.length - 1]?.deviceId;
 
-      await reader.decodeFromVideoDevice(deviceId, videoRef.current!, async (result) => {
+      const controls = await reader.decodeFromVideoDevice(deviceId, videoRef.current!, async (result) => {
         if (result) {
           setScanning(false);
-          reader.reset();
+          controls?.stop();
 
           const url = result.getText();
           const token = url.split("/badge/")[1]?.split("?")[0];
@@ -60,6 +59,7 @@ export function ScannerClient() {
           setBloodGroup(data.bloodGroup ?? "");
         }
       });
+      controlsRef.current = controls;
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Camera error");
       setScanning(false);
@@ -67,7 +67,8 @@ export function ScannerClient() {
   }
 
   function stopScanner() {
-    readerRef.current?.reset();
+    controlsRef.current?.stop();
+    controlsRef.current = null;
     setScanning(false);
   }
 

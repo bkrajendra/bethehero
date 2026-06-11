@@ -4,6 +4,11 @@ import { getAttendeesByEvent } from "@/lib/db/queries/attendees";
 import { checkInAction, markDonatedAction, markDeferredAction, markNoShowAction } from "./actions";
 import { Button } from "@/components/ui/button";
 
+async function checkInVoid(fd: FormData) { "use server"; await checkInAction(fd); }
+async function donatedVoid(fd: FormData) { "use server"; await markDonatedAction(fd); }
+async function deferredVoid(fd: FormData) { "use server"; await markDeferredAction(fd); }
+async function noShowVoid(fd: FormData) { "use server"; await markNoShowAction(fd); }
+
 const STATUS_COLORS: Record<string, string> = {
   registered: "bg-blue-500/20 text-blue-300",
   confirmed:  "bg-yellow-500/20 text-yellow-300",
@@ -52,24 +57,24 @@ export default async function AttendeesPage() {
                 <td className="px-4 py-3">
                   <div className="flex gap-2 flex-wrap">
                     {(a.status === "registered" || a.status === "confirmed") && (
-                      <form action={checkInAction}>
+                      <form action={checkInVoid}>
                         <input type="hidden" name="attendeeId" value={a.id} />
                         <Button size="sm" type="submit" className="bg-[#c8102e] hover:bg-[#ff2442] h-7 text-xs">Check In</Button>
                       </form>
                     )}
                     {a.status === "checked_in" && (
-                      <form action={markDonatedAction}>
+                      <form action={donatedVoid}>
                         <input type="hidden" name="attendeeId" value={a.id} />
                         <Button size="sm" type="submit" className="bg-green-600 hover:bg-green-500 h-7 text-xs">Mark Donated</Button>
                       </form>
                     )}
                     {!["donated", "deferred", "no_show"].includes(a.status) && (
                       <>
-                        <form action={markDeferredAction}>
+                        <form action={deferredVoid}>
                           <input type="hidden" name="attendeeId" value={a.id} />
                           <Button size="sm" variant="outline" type="submit" className="border-yellow-500/30 text-yellow-300 h-7 text-xs">Defer</Button>
                         </form>
-                        <form action={markNoShowAction}>
+                        <form action={noShowVoid}>
                           <input type="hidden" name="attendeeId" value={a.id} />
                           <Button size="sm" variant="outline" type="submit" className="border-gray-500/30 text-gray-400 h-7 text-xs">No-Show</Button>
                         </form>

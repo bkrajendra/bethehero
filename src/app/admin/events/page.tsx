@@ -4,6 +4,10 @@ import { Button } from "@/components/ui/button";
 import { CreateEventDialog } from "./CreateEventDialog";
 import { setActiveEventAction, activateEventAction, closeEventAction } from "./actions";
 
+async function setActiveVoid(id: string) { "use server"; await setActiveEventAction(id); }
+async function activateVoid(id: string) { "use server"; await activateEventAction(id); }
+async function closeVoid(id: string) { "use server"; await closeEventAction(id); }
+
 export default async function EventsPage() {
   await requireAdmin();
   const [events, settings] = await Promise.all([getAllEvents(), getAppSettings()]);
@@ -40,19 +44,19 @@ export default async function EventsPage() {
             </div>
             <div className="flex gap-2 flex-wrap justify-end">
               {event.id !== settings?.currentEventId && (
-                <form action={setActiveEventAction.bind(null, event.id)}>
+                <form action={setActiveVoid.bind(null, event.id)}>
                   <Button variant="outline" size="sm" className="border-[rgba(200,16,46,0.3)] text-[rgba(253,240,238,0.7)]">
                     Set as Active Drive
                   </Button>
                 </form>
               )}
               {event.status === "draft" && (
-                <form action={activateEventAction.bind(null, event.id)}>
+                <form action={activateVoid.bind(null, event.id)}>
                   <Button size="sm" className="bg-[#c8102e] hover:bg-[#ff2442]">Activate</Button>
                 </form>
               )}
               {event.status === "active" && (
-                <form action={closeEventAction.bind(null, event.id)}>
+                <form action={closeVoid.bind(null, event.id)}>
                   <Button variant="destructive" size="sm">Close</Button>
                 </form>
               )}
