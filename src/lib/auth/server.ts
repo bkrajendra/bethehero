@@ -3,8 +3,8 @@ import { cookies } from "next/headers";
 import { getDonorByAuthUserId } from "@/lib/db/queries/donors";
 import { getAdminByAuthUserId } from "@/lib/db/queries/admins";
 
-export function createSupabaseServerClient() {
-  const cookieStore = cookies();
+export async function createSupabaseServerClient() {
+  const cookieStore = await cookies();
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -26,7 +26,7 @@ export function createSupabaseServerClient() {
 }
 
 export async function requireDonor() {
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error || !user) {
     throw new Response("Unauthorized", { status: 401 });
@@ -39,7 +39,7 @@ export async function requireDonor() {
 }
 
 export async function requireAdmin() {
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error || !user) {
     throw new Response("Unauthorized", { status: 401 });
