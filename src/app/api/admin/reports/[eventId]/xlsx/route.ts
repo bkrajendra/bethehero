@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth/server";
+import { requireAdmin, AuthError } from "@/lib/auth/server";
 import { getEventById } from "@/lib/db/queries/events";
 import { getAttendeesByEvent } from "@/lib/db/queries/attendees";
 import { buildEventXlsx } from "@/lib/reports/xlsx";
+import { computeKPIs } from "@/lib/reports/kpis";
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ eventId: string }> }) {
   try {
@@ -12,19 +13,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ eve
     if (!event) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
     const attendees = await getAttendeesByEvent(eventId);
-    const statusCounts: Record<string, number> = {};
-    for (const a of attendees) statusCounts[a.status] = (statusCounts[a.status] ?? 0) + 1;
-    const total = attendees.length;
-    const donated = statusCounts["donated"] ?? 0;
-
-    const kpis = {
-      registered: total,
-      checkedIn:  statusCounts["checked_in"] ?? 0,
-      donated,
-      deferred:   statusCounts["deferred"]   ?? 0,
-      noShow:     statusCounts["no_show"]    ?? 0,
-      conversionPct: total > 0 ? Math.round((donated / total) * 100) : 0,
-    };
+    const kpis = computeKPIs(attendees);
 
     const buffer = await buildEventXlsx(event.name, attendees, kpis);
 
@@ -34,7 +23,11 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ eve
         "Content-Disposition": `attachment; filename="report-${event.name.replace(/\s+/g,"-")}.xlsx"`,
       },
     });
-  } catch {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  } catch (err) {
+    if (err instanceof AuthError) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    console.error("[api] unexpected error", err);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

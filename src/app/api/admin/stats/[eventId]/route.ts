@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth/server";
+import { requireAdmin, AuthError } from "@/lib/auth/server";
 import { db } from "@/lib/db/index";
 import { eventAttendees } from "@/lib/db/schema";
 import { eq, and, sql } from "drizzle-orm";
@@ -64,7 +64,11 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ eve
         .map(r => ({ name: r.bloodGroup!, value: r.count })),
       registrationsOverTime: regOverTime.map(r => ({ time: r.day, count: r.count })),
     });
-  } catch {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  } catch (err) {
+    if (err instanceof AuthError) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    console.error("[api] unexpected error", err);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
