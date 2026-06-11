@@ -3,6 +3,7 @@ import { Bebas_Neue, Cormorant_Garamond, Syne, Geist } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Providers } from "@/components/Providers";
+import { ServiceWorkerRegistrar } from "@/components/ServiceWorkerRegistrar";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
@@ -39,7 +40,12 @@ export default function RootLayout({
       lang="en"
       className={cn("h-full", "overflow-hidden", bebasNeue.variable, cormorant.variable, syne.variable, "font-sans", geist.variable)}
     >
-      <body className="h-full overflow-hidden"><Providers>{children}</Providers></body>
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#c8102e" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+      </head>
+      <body className="h-full overflow-hidden"><ServiceWorkerRegistrar /><Providers>{children}</Providers></body>
     </html>
   );
 }

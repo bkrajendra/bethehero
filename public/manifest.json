@@ -1,0 +1,13 @@
+{
+  "name": "BeTheHero — Blood Donation Drive",
+  "short_name": "BeTheHero",
+  "description": "Register for and track your blood donation",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#070108",
+  "theme_color": "#c8102e",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
