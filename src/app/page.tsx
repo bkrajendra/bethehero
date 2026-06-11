@@ -100,7 +100,7 @@ export default function Home() {
 
         {/* CTA */}
         <div className="cta-wrap">
-          <a href="#register" className="cta">
+          <a href="/register" className="cta">
             <div className="pr" />
             <div className="pr pr2" />
             <span className="cta-text">Register to Donate</span>
