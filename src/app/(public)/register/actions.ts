@@ -4,7 +4,7 @@ import { upsertDonorByEmail } from "@/lib/db/queries/donors";
 import { getActiveEvent } from "@/lib/db/queries/events";
 import { createAttendee } from "@/lib/db/queries/attendees";
 import { generateBadgeToken } from "@/lib/qr/generate";
-import { sendEmail } from "@/lib/email/ses";
+import { sendEmail } from "@/lib/onesignal/client";
 import { confirmationEmailHtml } from "@/lib/email/templates/confirmation";
 
 const RegisterSchema = z.object({

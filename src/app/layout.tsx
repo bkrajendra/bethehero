@@ -3,7 +3,7 @@ import { Bebas_Neue, Cormorant_Garamond, Syne, Geist } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Providers } from "@/components/Providers";
-import { ServiceWorkerRegistrar } from "@/components/ServiceWorkerRegistrar";
+import { OneSignalInit } from "@/lib/onesignal/init";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
@@ -45,7 +45,7 @@ export default function RootLayout({
         <meta name="theme-color" content="#c8102e" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
       </head>
-      <body className="h-full overflow-hidden"><ServiceWorkerRegistrar /><Providers>{children}</Providers></body>
+      <body className="h-full overflow-hidden"><OneSignalInit /><Providers>{children}</Providers></body>
     </html>
   );
 }

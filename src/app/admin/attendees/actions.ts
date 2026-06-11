@@ -5,7 +5,7 @@ import { requireAdmin } from "@/lib/auth/server";
 import { getAttendeeById, adminUpdateAttendee } from "@/lib/db/queries/attendees";
 import { writeAuditLog } from "@/lib/db/queries/audit";
 import { nanoid } from "nanoid";
-import { sendEmail } from "@/lib/email/ses";
+import { sendEmail } from "@/lib/onesignal/client";
 import { thankYouEmailHtml } from "@/lib/email/templates/thank-you";
 import { feedbackRequestEmailHtml } from "@/lib/email/templates/feedback-request";
 

@@ -3,10 +3,8 @@ import { and, eq, lte, gte } from "drizzle-orm";
 import { db } from "@/lib/db/index";
 import { eventAttendees, events } from "@/lib/db/schema";
 import { enqueueNotification, getPendingNotifications, markNotificationSent, markNotificationFailed } from "@/lib/db/queries/notifications";
-import { sendEmail } from "@/lib/email/ses";
+import { sendEmail, sendPush } from "@/lib/onesignal/client";
 import { reminderEmailHtml } from "@/lib/email/templates/reminder";
-import { sendPushNotification } from "@/lib/push/send";
-import { getPushSubscriptionsByDonor } from "@/lib/push/subscriptions";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://bethehero.in";
 
@@ -94,19 +92,12 @@ export async function GET(req: NextRequest) {
           }),
         });
       } else if (job.channel === "push") {
-        const subscriptions = await getPushSubscriptionsByDonor(donor.id);
-        await Promise.all(
-          subscriptions.map((sub) =>
-            sendPushNotification(
-              { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth },
-              {
-                title: "Donation Drive Tomorrow!",
-                body:  `${event.name} is tomorrow at ${event.venue}. Don't forget!`,
-                url:   `${APP_URL}/badge/${attendee.badgeToken}`,
-              },
-            )
-          )
-        );
+        await sendPush({
+          externalUserId: donor.id,
+          title: "Donation Drive Tomorrow!",
+          body:  `${event.name} is tomorrow at ${event.venue}. Don't forget!`,
+          url:   `${APP_URL}/badge/${attendee.badgeToken}`,
+        });
       }
 
       await markNotificationSent(job.id);
