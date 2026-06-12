@@ -79,9 +79,26 @@ export function CertificateDownloadButton({ data }: { data: CertData }) {
     <PDFDownloadLink
       document={<CertDocument data={data} />}
       fileName={`certificate-${data.attendee.certificateNumber}.pdf`}
-      className="inline-flex items-center justify-center rounded-md bg-[#c8102e] hover:bg-[#ff2442] text-white font-semibold px-6 py-3 text-sm transition-colors"
     >
-      {({ loading }) => loading ? "Generating PDF…" : "Download Certificate (PDF)"}
+      {({ loading }) => (
+        <button
+          disabled={loading}
+          aria-busy={loading}
+          className="inline-flex items-center justify-center gap-2 rounded-md bg-[#c8102e] text-white font-semibold px-6 py-3 text-sm transition-colors disabled:opacity-70 disabled:cursor-not-allowed hover:bg-[#a50d27]"
+        >
+          {loading ? (
+            <>
+              <svg className="animate-spin h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+              </svg>
+              Generating PDF…
+            </>
+          ) : (
+            "Download Certificate (PDF)"
+          )}
+        </button>
+      )}
     </PDFDownloadLink>
   );
 }
