@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { checkInAction, markDonatedAction, markDeferredAction, markNoShowAction, addDonorToEventAction } from "./actions";
+import { useToast } from "@/components/admin/ToastProvider";
 
 const STATUS_STYLES: Record<string, string> = {
   registered: "bg-blue-50 text-blue-600 border border-blue-200",
@@ -32,10 +33,20 @@ interface Attendee {
   donor?: Donor | null;
 }
 
+function Spinner() {
+  return (
+    <svg className="animate-spin h-3.5 w-3.5" fill="none" viewBox="0 0 24 24">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+    </svg>
+  );
+}
+
 function AddDonorDialog() {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
+  const { toast } = useToast();
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -44,7 +55,7 @@ function AddDonorDialog() {
     startTransition(async () => {
       const res = await addDonorToEventAction(fd);
       if (res.error) setError(res.error);
-      else setOpen(false);
+      else { setOpen(false); toast("Donor added to event"); }
     });
   }
 
@@ -77,14 +88,14 @@ function AddDonorDialog() {
           <div className="space-y-1">
             <Label className="text-gray-700 text-sm">Blood Group</Label>
             <select name="bloodGroup"
-              className="w-full h-9 px-3 rounded-md border border-gray-200 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#c8102e]/20">
+              className="w-full h-9 px-3 rounded-md border border-gray-200 text-sm text-gray-900 bg-white focus:outline-none">
               <option value="">Unknown</option>
               {BLOOD_GROUPS.map(g => <option key={g} value={g}>{g}</option>)}
             </select>
           </div>
           {error && <p className="text-red-500 text-sm">{error}</p>}
           <Button type="submit" disabled={isPending} className="w-full bg-[#c8102e] hover:bg-[#a50d27] text-white">
-            {isPending ? "Adding…" : "Add to Event"}
+            {isPending ? <><Spinner /> Adding…</> : "Add to Event"}
           </Button>
         </form>
       </DialogContent>
@@ -92,8 +103,13 @@ function AddDonorDialog() {
   );
 }
 
+type PendingAction = `${"checkin" | "donated" | "deferred" | "noshow"}-${string}`;
+
 export function AttendeesClient({ attendees }: { attendees: Attendee[] }) {
   const [search, setSearch] = useState("");
+  const [pending, setPending] = useState<PendingAction | null>(null);
+  const [, startTransition] = useTransition();
+  const { toast } = useToast();
 
   const filtered = attendees.filter(a => {
     const q = search.toLowerCase();
@@ -105,10 +121,65 @@ export function AttendeesClient({ attendees }: { attendees: Attendee[] }) {
     );
   });
 
-  async function checkInVoid(fd: FormData) { await checkInAction(fd); }
-  async function donatedVoid(fd: FormData) { await markDonatedAction(fd); }
-  async function deferredVoid(fd: FormData) { await markDeferredAction(fd); }
-  async function noShowVoid(fd: FormData) { await markNoShowAction(fd); }
+  function run(
+    key: PendingAction,
+    action: (fd: FormData) => Promise<{ error?: string }>,
+    attendeeId: string,
+    successMsg: string,
+    extraFields?: Record<string, string>,
+  ) {
+    setPending(key);
+    const fd = new FormData();
+    fd.set("attendeeId", attendeeId);
+    if (extraFields) Object.entries(extraFields).forEach(([k, v]) => fd.set(k, v));
+    startTransition(async () => {
+      const res = await action(fd);
+      setPending(null);
+      if (res?.error) toast(res.error, false);
+      else toast(successMsg);
+    });
+  }
+
+  function ActionButtons({ a, size = "sm" }: { a: Attendee; size?: "sm" }) {
+    const isCheckinPending  = pending === `checkin-${a.id}`;
+    const isDonatedPending  = pending === `donated-${a.id}`;
+    const isDeferredPending = pending === `deferred-${a.id}`;
+    const isNoShowPending   = pending === `noshow-${a.id}`;
+    const anyPending = pending !== null;
+
+    return (
+      <div className="flex gap-2 flex-wrap">
+        {(a.status === "registered" || a.status === "confirmed") && (
+          <Button size={size} disabled={anyPending}
+            className="bg-[#c8102e] hover:bg-[#a50d27] text-white h-7 text-xs min-w-[76px]"
+            onClick={() => run(`checkin-${a.id}`, checkInAction, a.id, `${a.donor?.fullName ?? "Donor"} checked in`)}>
+            {isCheckinPending ? <><Spinner />&nbsp;Checking in…</> : "Check In"}
+          </Button>
+        )}
+        {a.status === "checked_in" && (
+          <Button size={size} disabled={anyPending}
+            className="bg-green-600 hover:bg-green-700 text-white h-7 text-xs min-w-[100px]"
+            onClick={() => run(`donated-${a.id}`, markDonatedAction, a.id, `${a.donor?.fullName ?? "Donor"} marked as donated 🎉`)}>
+            {isDonatedPending ? <><Spinner />&nbsp;Saving…</> : "Mark Donated"}
+          </Button>
+        )}
+        {!["donated", "deferred", "no_show"].includes(a.status) && (
+          <>
+            <Button size={size} variant="outline" disabled={anyPending}
+              className="border-yellow-200 text-yellow-600 hover:bg-yellow-50 h-7 text-xs min-w-[52px]"
+              onClick={() => run(`deferred-${a.id}`, markDeferredAction, a.id, `${a.donor?.fullName ?? "Donor"} deferred`)}>
+              {isDeferredPending ? <><Spinner />&nbsp;…</> : "Defer"}
+            </Button>
+            <Button size={size} variant="outline" disabled={anyPending}
+              className="border-gray-200 text-gray-400 hover:bg-gray-50 h-7 text-xs min-w-[68px]"
+              onClick={() => run(`noshow-${a.id}`, markNoShowAction, a.id, `${a.donor?.fullName ?? "Donor"} marked no-show`)}>
+              {isNoShowPending ? <><Spinner />&nbsp;…</> : "No-Show"}
+            </Button>
+          </>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -151,34 +222,7 @@ export function AttendeesClient({ attendees }: { attendees: Attendee[] }) {
                     {a.status.replace("_", " ")}
                   </span>
                 </td>
-                <td className="px-4 py-3">
-                  <div className="flex gap-2 flex-wrap">
-                    {(a.status === "registered" || a.status === "confirmed") && (
-                      <form action={checkInVoid}>
-                        <input type="hidden" name="attendeeId" value={a.id} />
-                        <Button size="sm" type="submit" className="bg-[#c8102e] hover:bg-[#a50d27] text-white h-7 text-xs">Check In</Button>
-                      </form>
-                    )}
-                    {a.status === "checked_in" && (
-                      <form action={donatedVoid}>
-                        <input type="hidden" name="attendeeId" value={a.id} />
-                        <Button size="sm" type="submit" className="bg-green-600 hover:bg-green-700 text-white h-7 text-xs">Mark Donated</Button>
-                      </form>
-                    )}
-                    {!["donated", "deferred", "no_show"].includes(a.status) && (
-                      <>
-                        <form action={deferredVoid}>
-                          <input type="hidden" name="attendeeId" value={a.id} />
-                          <Button size="sm" variant="outline" type="submit" className="border-yellow-200 text-yellow-600 hover:bg-yellow-50 h-7 text-xs">Defer</Button>
-                        </form>
-                        <form action={noShowVoid}>
-                          <input type="hidden" name="attendeeId" value={a.id} />
-                          <Button size="sm" variant="outline" type="submit" className="border-gray-200 text-gray-400 hover:bg-gray-50 h-7 text-xs">No-Show</Button>
-                        </form>
-                      </>
-                    )}
-                  </div>
-                </td>
+                <td className="px-4 py-3"><ActionButtons a={a} /></td>
               </tr>
             ))}
           </tbody>
@@ -202,32 +246,7 @@ export function AttendeesClient({ attendees }: { attendees: Attendee[] }) {
                 {a.status.replace("_", " ")}
               </span>
             </div>
-            <div className="flex gap-2 flex-wrap">
-              {(a.status === "registered" || a.status === "confirmed") && (
-                <form action={checkInVoid}>
-                  <input type="hidden" name="attendeeId" value={a.id} />
-                  <Button size="sm" type="submit" className="bg-[#c8102e] hover:bg-[#a50d27] text-white h-8 text-xs">Check In</Button>
-                </form>
-              )}
-              {a.status === "checked_in" && (
-                <form action={donatedVoid}>
-                  <input type="hidden" name="attendeeId" value={a.id} />
-                  <Button size="sm" type="submit" className="bg-green-600 hover:bg-green-700 text-white h-8 text-xs">Mark Donated</Button>
-                </form>
-              )}
-              {!["donated", "deferred", "no_show"].includes(a.status) && (
-                <>
-                  <form action={deferredVoid}>
-                    <input type="hidden" name="attendeeId" value={a.id} />
-                    <Button size="sm" variant="outline" type="submit" className="border-yellow-200 text-yellow-600 h-8 text-xs">Defer</Button>
-                  </form>
-                  <form action={noShowVoid}>
-                    <input type="hidden" name="attendeeId" value={a.id} />
-                    <Button size="sm" variant="outline" type="submit" className="border-gray-200 text-gray-400 h-8 text-xs">No-Show</Button>
-                  </form>
-                </>
-              )}
-            </div>
+            <ActionButtons a={a} />
           </div>
         ))}
       </div>

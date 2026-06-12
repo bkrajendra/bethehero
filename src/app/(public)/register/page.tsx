@@ -128,7 +128,7 @@ export default function RegisterPage() {
               <input type="checkbox" id="consentGiven" name="consentGiven" required
                 className="mt-0.5 h-4 w-4 accent-[#c8102e] rounded" />
               <Label htmlFor="consentGiven" className="text-sm text-[#6a6a6a] leading-relaxed cursor-pointer">
-                I consent to the collection and use of my personal data for this blood donation drive in accordance with the DPDP Act.
+                I consent to the collection and use of my email, mobile number only for blood donation drive purposes.
               </Label>
             </div>
 

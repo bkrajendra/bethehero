@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { requireAdmin, AuthError } from "@/lib/auth/server";
 import { db } from "@/lib/db/index";
 import { donors } from "@/lib/db/schema";
-import { desc, isNull, isNotNull } from "drizzle-orm";
+import { desc, isNull, isNotNull, and } from "drizzle-orm";
 import {
   softDeleteDonor, hardDeleteDonor, restoreDonor,
   cleanupAllDeletedDonors, updateDonorProfile,
@@ -11,7 +11,7 @@ import { getAppSettings } from "@/lib/db/queries/events";
 import { getAttendeeByDonorAndEvent, createAttendee } from "@/lib/db/queries/attendees";
 import { db as rawDb } from "@/lib/db/index";
 import { eventAttendees } from "@/lib/db/schema";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { z } from "zod";
 
@@ -24,8 +24,14 @@ export async function GET(req: NextRequest) {
   const err = await auth(); if (err) return err;
   try {
     const showDeleted = req.nextUrl.searchParams.get("deleted") === "1";
+    const showUnverified = req.nextUrl.searchParams.get("unverified") === "1";
+    const where = showDeleted
+      ? isNotNull(donors.deletedAt)
+      : showUnverified
+        ? and(isNull(donors.deletedAt), isNull(donors.authUserId))
+        : isNull(donors.deletedAt);
     const all = await db.query.donors.findMany({
-      where: showDeleted ? isNotNull(donors.deletedAt) : isNull(donors.deletedAt),
+      where,
       orderBy: [desc(donors.createdAt)],
       with: { attendees: { with: { event: true } } },
     });

@@ -5,11 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createEventAction } from "./actions";
+import { useToast } from "@/components/admin/ToastProvider";
 
 export function CreateEventDialog() {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
+  const { toast } = useToast();
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -18,7 +20,7 @@ export function CreateEventDialog() {
     startTransition(async () => {
       const res = await createEventAction(formData);
       if (res.error) setError(res.error);
-      else setOpen(false);
+      else { setOpen(false); toast("Event created successfully"); }
     });
   }
 

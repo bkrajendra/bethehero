@@ -1,13 +1,8 @@
 import { getAllEvents, getAppSettings } from "@/lib/db/queries/events";
 import { requireAdmin } from "@/lib/auth/server";
-import { Button } from "@/components/ui/button";
 import { CreateEventDialog } from "./CreateEventDialog";
 import { EditEventDialog } from "./EditEventDialog";
-import { setActiveEventAction, activateEventAction, closeEventAction } from "./actions";
-
-async function setActiveVoid(id: string) { "use server"; await setActiveEventAction(id); }
-async function activateVoid(id: string) { "use server"; await activateEventAction(id); }
-async function closeVoid(id: string) { "use server"; await closeEventAction(id); }
+import { EventActions } from "./EventActions";
 
 const STATUS_STYLES: Record<string, string> = {
   active: "bg-green-50 text-green-600 border border-green-200",
@@ -54,25 +49,13 @@ export default async function EventsPage() {
                   {new Date(event.endAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Kolkata" })}
                 </p>
               </div>
-              <div className="flex gap-2 flex-wrap shrink-0">
+              <div className="flex gap-2 flex-wrap shrink-0 items-start">
                 <EditEventDialog event={event} />
-                {event.id !== settings?.currentEventId && (
-                  <form action={setActiveVoid.bind(null, event.id)}>
-                    <Button variant="outline" size="sm" className="border-gray-200 text-gray-600 hover:bg-gray-50">
-                      Set as Active
-                    </Button>
-                  </form>
-                )}
-                {event.status === "draft" && (
-                  <form action={activateVoid.bind(null, event.id)}>
-                    <Button size="sm" className="bg-[#c8102e] hover:bg-[#a50d27] text-white">Activate</Button>
-                  </form>
-                )}
-                {event.status === "active" && (
-                  <form action={closeVoid.bind(null, event.id)}>
-                    <Button variant="destructive" size="sm">Close</Button>
-                  </form>
-                )}
+                <EventActions
+                  eventId={event.id}
+                  status={event.status}
+                  isCurrentEvent={event.id === settings?.currentEventId}
+                />
               </div>
             </div>
           </div>
