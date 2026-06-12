@@ -35,6 +35,7 @@ export const donors = pgTable("donors", {
   consentGiven:   boolean("consent_given").notNull().default(false),
   consentAt:      timestamp("consent_at", { withTimezone: true }),
   consentVersion: text("consent_version"),
+  deletedAt:      timestamp("deleted_at", { withTimezone: true }),
   createdAt:      timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt:      timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });

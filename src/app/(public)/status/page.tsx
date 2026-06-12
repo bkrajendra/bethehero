@@ -41,15 +41,57 @@ export default function StatusPage() {
     );
   }
 
-  const { attendee, event } = data;
+  const { attendee, event, qrDataUrl } = data;
 
   if (attendee.status === "donated") {
     return <DonationCelebration attendeeId={attendee.id} />;
   }
 
+  const bloodGroup = attendee.bloodGroupAtEvent ?? attendee.donor?.bloodGroup;
+
   return (
     <main className="min-h-screen bg-[#f7f7f7] flex items-center justify-center p-6">
-      <div className="w-full max-w-sm">
+      <div className="w-full max-w-sm space-y-3">
+
+        {/* Badge card */}
+        <div className="bg-white border border-[#dddddd] rounded-2xl overflow-hidden"
+          style={{ boxShadow: "rgba(0,0,0,0.02) 0 0 0 1px, rgba(0,0,0,0.04) 0 2px 6px, rgba(0,0,0,0.1) 0 4px 8px" }}>
+
+          {/* Red header strip */}
+          <div className="bg-[#c8102e] px-5 py-3 flex items-center justify-between">
+            <span className="text-white font-bold text-sm tracking-wide">BeTheHero</span>
+            {bloodGroup && (
+              <span className="bg-white text-[#c8102e] font-bold text-sm px-2.5 py-0.5 rounded-full">
+                {bloodGroup}
+              </span>
+            )}
+          </div>
+
+          {/* Donor info + QR */}
+          <div className="px-5 py-5 flex items-center gap-5">
+            <div className="flex-1 min-w-0 space-y-1">
+              <p className="font-bold text-[#222222] text-base leading-tight">{attendee.donor?.fullName}</p>
+              {attendee.donor?.company && (
+                <p className="text-xs text-[#6a6a6a] truncate">{attendee.donor.company}</p>
+              )}
+              <p className="text-[10px] text-[#929292] mt-2">{event.name}</p>
+              <p className="text-[10px] text-[#929292]">{event.venue}</p>
+            </div>
+
+            {qrDataUrl && (
+              <div className="shrink-0 flex flex-col items-center gap-1.5">
+                <img src={qrDataUrl} alt="Badge QR code" width={100} height={100}
+                  className="rounded-lg border border-[#ebebeb]" />
+              </div>
+            )}
+          </div>
+
+          <p className="text-center text-[10px] text-[#929292] pb-3">
+            Show this at the event entrance
+          </p>
+        </div>
+
+        {/* Status card */}
         <div className="bg-white border border-[#dddddd] rounded-2xl p-8 space-y-8"
           style={{ boxShadow: "rgba(0,0,0,0.02) 0 0 0 1px, rgba(0,0,0,0.04) 0 2px 6px, rgba(0,0,0,0.1) 0 4px 8px" }}>
           <div className="text-center">
@@ -64,7 +106,7 @@ export default function StatusPage() {
           </div>
         </div>
 
-        <div className="text-center mt-4">
+        <div className="text-center">
           <Link href="/history" className="text-sm text-[#c8102e] hover:underline font-medium">
             View donation history →
           </Link>
