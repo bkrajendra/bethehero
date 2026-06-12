@@ -218,7 +218,7 @@ export function AttendeesClient({ attendees }: { attendees: Attendee[] }) {
                 <td className="px-4 py-3 text-gray-500">{a.donor?.company ?? "—"}</td>
                 <td className="px-4 py-3 text-gray-500">{a.bloodGroupAtEvent ?? a.donor?.bloodGroup ?? "—"}</td>
                 <td className="px-4 py-3">
-                  <span className={`text-xs px-2.5 py-1 rounded-full font-medium capitalize ${STATUS_STYLES[a.status] ?? "bg-gray-50 text-gray-500"}`}>
+                  <span className={`text-xs px-2.5 py-1 rounded-full font-medium capitalize whitespace-nowrap ${STATUS_STYLES[a.status] ?? "bg-gray-50 text-gray-500"}`}>
                     {a.status.replace("_", " ")}
                   </span>
                 </td>
