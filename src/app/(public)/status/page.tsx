@@ -2,6 +2,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { StatusTimeline } from "@/components/StatusTimeline";
 import { DonationCelebration } from "@/components/DonationCelebration";
+import { PushSubscribeCard } from "@/components/PushSubscribeCard";
 import Link from "next/link";
 
 async function fetchStatus() {
@@ -105,6 +106,10 @@ export default function StatusPage() {
             {event.venue} · {new Date(event.startAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Kolkata" })}
           </div>
         </div>
+
+        {(attendee.status === "registered" || attendee.status === "confirmed") && (
+          <PushSubscribeCard donorId={attendee.donorId} />
+        )}
 
         <div className="text-center">
           <Link href="/history" className="text-sm text-[#c8102e] hover:underline font-medium">
