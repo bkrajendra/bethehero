@@ -69,11 +69,14 @@ export async function checkInAction(formData: FormData): Promise<{ error?: strin
     if (!attendee) return { error: "Attendee not found" };
     if (!["registered","confirmed"].includes(attendee.status)) return { error: "Invalid status transition" };
 
+    // Use provided blood group, or fall back to donor's profile blood group
+    const effectiveBloodGroup = bloodGroup ?? (attendee.donor?.bloodGroup ?? null);
+
     await adminUpdateAttendee(attendeeId, {
       status: "checked_in",
       checkedInAt: new Date(),
       checkedInBy: adminId,
-      ...(bloodGroup ? { bloodGroupAtEvent: bloodGroup } : {}),
+      ...(effectiveBloodGroup ? { bloodGroupAtEvent: effectiveBloodGroup } : {}),
     });
     await writeAuditLog({ actorAdminId: adminId, action: "check_in", targetTable: "event_attendees", targetId: attendeeId });
     revalidatePath("/admin/attendees");
@@ -91,7 +94,9 @@ export async function markDonatedAction(formData: FormData): Promise<{ error?: s
     const attendee = await getAttendeeById(attendeeId);
     if (!attendee) return { error: "Attendee not found" };
     if (attendee.status !== "checked_in") return { error: "Attendee must be checked in before marking donated" };
-    if (!attendee.bloodGroupAtEvent) return { error: "Blood group must be captured before marking donated" };
+    // Fall back to donor's profile blood group if not captured at check-in
+    const bloodGroupAtEvent = attendee.bloodGroupAtEvent ?? attendee.donor?.bloodGroup ?? null;
+    if (!bloodGroupAtEvent) return { error: "Blood group must be captured before marking donated" };
 
     const certificateNumber = `BTH-${new Date().getFullYear()}-${nanoid(8).toUpperCase()}`;
 
@@ -101,6 +106,7 @@ export async function markDonatedAction(formData: FormData): Promise<{ error?: s
       markedBy: adminId,
       certificateNumber,
       certificateIssuedAt: new Date(),
+      bloodGroupAtEvent,
     });
 
     // Send thank-you and feedback emails immediately
