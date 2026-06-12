@@ -9,7 +9,7 @@ async function seed() {
   const [event] = await db.insert(events).values({
     name: "Confluxsys Blood Donation Drive 2026",
     venue: "Confluxsys Pvt Ltd",
-    address: "Magarpatta City, Hadapsar, Pune, Maharashtra 411013",
+    address: "803-804, Supreme Headquarters, Pune",
     startAt: new Date("2026-06-17T09:00:00+05:30"),
     endAt: new Date("2026-06-17T17:00:00+05:30"),
     donationOpenAt: new Date("2026-06-17T09:00:00+05:30"),

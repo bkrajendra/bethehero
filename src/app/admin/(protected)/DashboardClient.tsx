@@ -6,7 +6,7 @@ import {
   XAxis, YAxis, Tooltip, ResponsiveContainer,
 } from "recharts";
 
-const BLOOD_GROUP_COLORS = ["#c8102e","#ff2442","#850020","#e8b84b","#ff6b6b","#ffd700","#ff4444","#cc0000"];
+const BLOOD_GROUP_COLORS = ["#c8102e","#e8384f","#a50d27","#e8b84b","#ff6b6b","#f59e0b","#ef4444","#dc2626"];
 
 interface KPIs {
   registered: number;
@@ -41,7 +41,7 @@ export function DashboardClient({ eventId }: { eventId: string }) {
     return (
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {Array.from({ length: 7 }).map((_, i) => (
-          <div key={i} className="h-24 rounded-xl bg-[rgba(200,16,46,0.05)] animate-pulse" />
+          <div key={i} className="h-24 rounded-xl bg-gray-100 animate-pulse" />
         ))}
       </div>
     );
@@ -56,38 +56,38 @@ export function DashboardClient({ eventId }: { eventId: string }) {
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div className="flex justify-end">
-        <p className="text-[10px] text-[rgba(253,240,238,0.2)]">
+        <p className="text-[10px] text-gray-300">
           Updated {new Date(dataUpdatedAt).toLocaleTimeString()}
         </p>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <KPICard label="Registered"  value={kpis.registered} />
-        <KPICard label="Checked In"  value={kpis.checkedIn}  color="#e8b84b" />
-        <KPICard label="Donated"     value={kpis.donated}    color="#22c55e" />
-        <KPICard label="Conversion"  value={kpis.conversionPct} suffix="%" color="#ff2442" />
-        <KPICard label="Confirmed"   value={kpis.confirmed} />
-        <KPICard label="Deferred"    value={kpis.deferred}  color="#f87171" />
-        <KPICard label="No-Show"     value={kpis.noShow}    color="#6b7280" />
+        <KPICard label="Registered"  value={kpis.registered}      color="#c8102e" />
+        <KPICard label="Checked In"  value={kpis.checkedIn}       color="#d97706" />
+        <KPICard label="Donated"     value={kpis.donated}         color="#16a34a" />
+        <KPICard label="Conversion"  value={kpis.conversionPct}   suffix="%" color="#c8102e" />
+        <KPICard label="Confirmed"   value={kpis.confirmed}       color="#2563eb" />
+        <KPICard label="Deferred"    value={kpis.deferred}        color="#dc2626" />
+        <KPICard label="No-Show"     value={kpis.noShow}          color="#6b7280" />
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
-        <div className="border border-[rgba(200,16,46,0.2)] rounded-xl p-4">
-          <h3 className="text-sm font-semibold mb-4 text-[rgba(253,240,238,0.7)]">Donation Funnel</h3>
+        <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
+          <h3 className="text-sm font-semibold mb-4 text-gray-600">Donation Funnel</h3>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={funnelData} barSize={40}>
-              <XAxis dataKey="name" tick={{ fill: "rgba(253,240,238,0.5)", fontSize: 11 }} axisLine={false} tickLine={false} />
+              <XAxis dataKey="name" tick={{ fill: "#9ca3af", fontSize: 11 }} axisLine={false} tickLine={false} />
               <YAxis hide />
-              <Tooltip contentStyle={{ background: "#0a0109", border: "1px solid rgba(200,16,46,0.3)", color: "#fdf0ee" }} />
+              <Tooltip contentStyle={{ background: "#fff", border: "1px solid #e5e7eb", color: "#111", borderRadius: 8 }} />
               <Bar dataKey="value" fill="#c8102e" radius={[6,6,0,0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
 
-        <div className="border border-[rgba(200,16,46,0.2)] rounded-xl p-4">
-          <h3 className="text-sm font-semibold mb-4 text-[rgba(253,240,238,0.7)]">Blood Group Distribution</h3>
+        <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
+          <h3 className="text-sm font-semibold mb-4 text-gray-600">Blood Group Distribution</h3>
           {bloodGroupDistribution.length > 0 ? (
             <ResponsiveContainer width="100%" height={200}>
               <PieChart>
@@ -99,23 +99,23 @@ export function DashboardClient({ eventId }: { eventId: string }) {
                     <Cell key={i} fill={BLOOD_GROUP_COLORS[i % BLOOD_GROUP_COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip contentStyle={{ background: "#0a0109", border: "1px solid rgba(200,16,46,0.3)", color: "#fdf0ee" }} />
+                <Tooltip contentStyle={{ background: "#fff", border: "1px solid #e5e7eb", color: "#111", borderRadius: 8 }} />
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <p className="text-[rgba(253,240,238,0.3)] text-sm text-center py-8">No donations recorded yet</p>
+            <p className="text-gray-300 text-sm text-center py-8">No donations recorded yet</p>
           )}
         </div>
 
         {registrationsOverTime.length > 0 && (
-          <div className="border border-[rgba(200,16,46,0.2)] rounded-xl p-4 md:col-span-2">
-            <h3 className="text-sm font-semibold mb-4 text-[rgba(253,240,238,0.7)]">Registrations Over Time</h3>
+          <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm md:col-span-2">
+            <h3 className="text-sm font-semibold mb-4 text-gray-600">Registrations Over Time</h3>
             <ResponsiveContainer width="100%" height={160}>
               <LineChart data={registrationsOverTime}>
-                <XAxis dataKey="time" tick={{ fill: "rgba(253,240,238,0.3)", fontSize: 9 }} axisLine={false} tickLine={false}
+                <XAxis dataKey="time" tick={{ fill: "#d1d5db", fontSize: 9 }} axisLine={false} tickLine={false}
                   tickFormatter={(v: string) => new Date(v).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })} />
                 <YAxis hide />
-                <Tooltip contentStyle={{ background: "#0a0109", border: "1px solid rgba(200,16,46,0.3)", color: "#fdf0ee" }} />
+                <Tooltip contentStyle={{ background: "#fff", border: "1px solid #e5e7eb", color: "#111", borderRadius: 8 }} />
                 <Line type="monotone" dataKey="count" stroke="#c8102e" strokeWidth={2} dot={false} />
               </LineChart>
             </ResponsiveContainer>

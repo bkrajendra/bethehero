@@ -15,9 +15,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const [events, settings] = await Promise.all([getAllEvents(), getAppSettings()]);
 
   return (
-    <div className="flex h-screen bg-[#070108] text-[#fdf0ee]">
+    <div className="flex h-screen bg-gray-50 overflow-hidden">
       <AdminSidebar admin={admin} events={events} currentEventId={settings?.currentEventId ?? null} />
-      <main className="flex-1 overflow-auto p-6">{children}</main>
+      <main className="flex-1 overflow-auto pt-14 md:pt-0">
+        <div className="p-4 md:p-6 max-w-7xl mx-auto">
+          {children}
+        </div>
+      </main>
     </div>
   );
 }

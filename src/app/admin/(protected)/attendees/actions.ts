@@ -2,7 +2,9 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth/server";
-import { getAttendeeById, adminUpdateAttendee } from "@/lib/db/queries/attendees";
+import { getAttendeeById, getAttendeeByDonorAndEvent, adminUpdateAttendee, createAttendee } from "@/lib/db/queries/attendees";
+import { getDonorByEmail, createDonor } from "@/lib/db/queries/donors";
+import { getAppSettings } from "@/lib/db/queries/events";
 import { writeAuditLog } from "@/lib/db/queries/audit";
 import { nanoid } from "nanoid";
 import { sendEmail } from "@/lib/onesignal/client";
@@ -10,6 +12,49 @@ import { thankYouEmailHtml } from "@/lib/email/templates/thank-you";
 import { feedbackRequestEmailHtml } from "@/lib/email/templates/feedback-request";
 
 const VALID_GROUPS = ["A+","A-","B+","B-","AB+","AB-","O+","O-"] as const;
+
+export async function addDonorToEventAction(formData: FormData): Promise<{ error?: string; success?: boolean }> {
+  try {
+    const { adminId } = await requireAdmin();
+    const settings = await getAppSettings();
+    if (!settings?.currentEventId) return { error: "No active event" };
+
+    const email = z.string().email().parse((formData.get("email") as string)?.toLowerCase().trim());
+    const fullName = z.string().min(2).parse(formData.get("fullName") as string);
+    const mobile = z.string().min(6).parse(formData.get("mobile") as string);
+    const bloodGroupRaw = formData.get("bloodGroup") as string;
+    const bloodGroup = bloodGroupRaw ? z.enum(VALID_GROUPS).parse(bloodGroupRaw) : null;
+
+    let donor = await getDonorByEmail(email);
+    if (!donor) {
+      donor = await createDonor({
+        email,
+        fullName,
+        mobile,
+        bloodGroup: bloodGroup ?? undefined,
+        consentGiven: true,
+        consentAt: new Date(),
+        consentVersion: "v1.0",
+      });
+    }
+
+    const existing = await getAttendeeByDonorAndEvent(donor.id, settings.currentEventId);
+    if (existing) return { error: "Donor is already registered for this event" };
+
+    await createAttendee({
+      eventId: settings.currentEventId,
+      donorId: donor.id,
+      badgeToken: nanoid(24),
+      status: "registered",
+    });
+
+    await writeAuditLog({ actorAdminId: adminId, action: "add_donor_to_event", targetTable: "event_attendees", targetId: donor.id });
+    revalidatePath("/admin/attendees");
+    return { success: true };
+  } catch (e: unknown) {
+    return { error: e instanceof Error ? e.message : "Failed" };
+  }
+}
 
 export async function checkInAction(formData: FormData): Promise<{ error?: string; success?: boolean }> {
   try {

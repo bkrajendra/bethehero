@@ -53,7 +53,7 @@ function CertDocument({ data }: { data: CertData }) {
         <Text style={styles.label}>Venue</Text>
         <Text style={styles.value}>{attendee.event.venue}</Text>
         <Text style={styles.label}>Date</Text>
-        <Text style={styles.value}>{new Date(attendee.event.startAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</Text>
+        <Text style={styles.value}>{new Date(attendee.event.startAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Kolkata" })}</Text>
         <Text style={styles.label}>Certificate No.</Text>
         <Text style={styles.value}>{attendee.certificateNumber}</Text>
         <View style={styles.divider} />

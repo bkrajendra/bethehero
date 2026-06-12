@@ -30,7 +30,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ eve
       createElement(EventReportPDF, {
         eventName: event.name,
         venue: event.venue ?? "",
-        date: new Date(event.startAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" }),
+        date: new Date(event.startAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Kolkata" }),
         kpis,
         bloodGroups: Object.entries(bloodGroupMap).map(([name, value]) => ({ name, value })),
       }) as AnyReactElement,

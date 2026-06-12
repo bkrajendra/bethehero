@@ -23,46 +23,43 @@ export function CreateEventDialog() {
   }
 
   const fields = [
-    { name: "name", label: "Event Name" },
-    { name: "venue", label: "Venue" },
-    { name: "address", label: "Address" },
-    { name: "organiserName", label: "Organiser Name" },
-    { name: "bloodBankName", label: "Blood Bank Name" },
-    { name: "organiserSignatoryName", label: "Organiser Signatory Name" },
+    { name: "name",                    label: "Event Name" },
+    { name: "venue",                   label: "Venue" },
+    { name: "address",                 label: "Address" },
+    { name: "organiserName",           label: "Organiser Name" },
+    { name: "bloodBankName",           label: "Blood Bank Name" },
+    { name: "organiserSignatoryName",  label: "Organiser Signatory Name" },
     { name: "organiserSignatoryTitle", label: "Organiser Signatory Title" },
-    { name: "bloodBankSignatoryName", label: "Blood Bank Signatory Name" },
+    { name: "bloodBankSignatoryName",  label: "Blood Bank Signatory Name" },
     { name: "bloodBankSignatoryTitle", label: "Blood Bank Signatory Title" },
   ];
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<Button className="bg-[#c8102e] hover:bg-[#ff2442]">+ Create Event</Button>} />
-      <DialogContent className="bg-[#0a0109] border-[rgba(200,16,46,0.2)] text-[#fdf0ee] max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogTrigger render={<Button className="bg-[#c8102e] hover:bg-[#a50d27] text-white">+ Create Event</Button>} />
+      <DialogContent className="bg-white border border-gray-100 text-gray-900 max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create New Event</DialogTitle>
+          <DialogTitle className="text-gray-900">Create New Event</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           {fields.map(f => (
             <div key={f.name} className="space-y-1">
-              <Label className="text-[#fdf0ee]">{f.label} *</Label>
-              <Input name={f.name} required
-                className="bg-transparent border-[rgba(200,16,46,0.3)] text-[#fdf0ee]" />
+              <Label className="text-gray-700 text-sm">{f.label} *</Label>
+              <Input name={f.name} required className="border-gray-200 text-gray-900" />
             </div>
           ))}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
-              <Label className="text-[#fdf0ee]">Start *</Label>
-              <Input name="startAt" type="datetime-local" required
-                className="bg-transparent border-[rgba(200,16,46,0.3)] text-[#fdf0ee]" />
+              <Label className="text-gray-700 text-sm">Start *</Label>
+              <Input name="startAt" type="datetime-local" required className="border-gray-200 text-gray-900" />
             </div>
             <div className="space-y-1">
-              <Label className="text-[#fdf0ee]">End *</Label>
-              <Input name="endAt" type="datetime-local" required
-                className="bg-transparent border-[rgba(200,16,46,0.3)] text-[#fdf0ee]" />
+              <Label className="text-gray-700 text-sm">End *</Label>
+              <Input name="endAt" type="datetime-local" required className="border-gray-200 text-gray-900" />
             </div>
           </div>
-          {error && <p className="text-[#ff2442] text-sm">{error}</p>}
-          <Button type="submit" disabled={isPending} className="w-full bg-[#c8102e] hover:bg-[#ff2442]">
+          {error && <p className="text-red-500 text-sm">{error}</p>}
+          <Button type="submit" disabled={isPending} className="w-full bg-[#c8102e] hover:bg-[#a50d27] text-white">
             {isPending ? "Creating…" : "Create Event"}
           </Button>
         </form>

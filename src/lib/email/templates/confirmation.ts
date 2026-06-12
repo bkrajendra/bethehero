@@ -12,8 +12,8 @@ export interface ConfirmationParams {
 }
 
 export function confirmationEmailHtml(p: ConfirmationParams): string {
-  const dateStr = p.startAt.toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
-  const timeStr = p.startAt.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+  const dateStr = p.startAt.toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric", timeZone: "Asia/Kolkata" });
+  const timeStr = p.startAt.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Kolkata" });
   const badgeUrl = `${p.appUrl}/badge/${p.badgeToken}`;
   const dosHtml = p.instructionsDos.map(d => `<li style="margin-bottom:6px;">${d}</li>`).join("");
   const dontsHtml = p.instructionsDonts.map(d => `<li style="margin-bottom:6px;">${d}</li>`).join("");

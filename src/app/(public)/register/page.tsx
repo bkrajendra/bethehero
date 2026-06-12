@@ -2,13 +2,20 @@
 import { useState, useTransition } from "react";
 import { registerDonor, type RegisterResult } from "./actions";
 import { ConfirmationScreen } from "./ConfirmationScreen";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
 import Link from "next/link";
 
 const BLOOD_GROUPS = ["A+","A-","B+","B-","AB+","AB-","O+","O-"] as const;
+
+function PageShell({ children }: { children: React.ReactNode }) {
+  return (
+    <main className="min-h-screen bg-[#f7f7f7] flex items-center justify-center p-6">
+      <div className="w-full max-w-md">{children}</div>
+    </main>
+  );
+}
 
 export default function RegisterPage() {
   const [result, setResult] = useState<RegisterResult | null>(null);
@@ -32,98 +39,111 @@ export default function RegisterPage() {
 
   if (result?.type === "no_event") {
     return (
-      <main className="min-h-screen flex items-center justify-center p-6 bg-[#070108]">
-        <div className="max-w-md w-full text-center space-y-6">
-          <div className="text-6xl animate-pulse">🩸</div>
-          <h2 className="text-2xl font-bold text-[#fdf0ee]">Thank you for your interest!</h2>
-          <p className="text-[rgba(253,240,238,0.55)]">
-            There&apos;s no active blood donation drive right now. We&apos;ve saved your details and will reach out when the next drive is scheduled.
-          </p>
-          <Link href="/" className={cn(buttonVariants({ variant: "outline" }), "border-[#c8102e] text-[#fdf0ee]")}>Close</Link>
+      <PageShell>
+        <div className="bg-white border border-[#dddddd] rounded-2xl p-8 text-center space-y-4"
+          style={{ boxShadow: "rgba(0,0,0,0.02) 0 0 0 1px, rgba(0,0,0,0.04) 0 2px 6px, rgba(0,0,0,0.1) 0 4px 8px" }}>
+          <div className="text-5xl">🩸</div>
+          <h2 className="text-xl font-bold text-[#222222]">Thank you for your interest!</h2>
+          <p className="text-[#6a6a6a] text-sm">No active blood donation drive right now. We'll reach out when the next drive is scheduled.</p>
+          <Link href="/" className="inline-block text-sm text-[#c8102e] hover:underline font-medium">← Back to home</Link>
         </div>
-      </main>
+      </PageShell>
     );
   }
 
   if (result?.type === "already_exists") {
     return (
-      <main className="min-h-screen flex items-center justify-center p-6 bg-[#070108]">
-        <div className="max-w-md w-full text-center space-y-6">
-          <h2 className="text-2xl font-bold text-[#fdf0ee]">You&apos;re already registered!</h2>
-          <p className="text-[rgba(253,240,238,0.55)]">Log in to view your badge and donation status.</p>
-          <Link href="/login" className={cn(buttonVariants(), "bg-[#c8102e] hover:bg-[#ff2442]")}>Log In</Link>
+      <PageShell>
+        <div className="bg-white border border-[#dddddd] rounded-2xl p-8 text-center space-y-4"
+          style={{ boxShadow: "rgba(0,0,0,0.02) 0 0 0 1px, rgba(0,0,0,0.04) 0 2px 6px, rgba(0,0,0,0.1) 0 4px 8px" }}>
+          <h2 className="text-xl font-bold text-[#222222]">You&apos;re already registered!</h2>
+          <p className="text-[#6a6a6a] text-sm">Log in to view your badge and donation status.</p>
+          <Link href="/login"
+            className="inline-flex items-center justify-center w-full h-12 bg-[#c8102e] hover:bg-[#a50d27] text-white font-medium rounded-lg transition-colors">
+            Log in
+          </Link>
         </div>
-      </main>
+      </PageShell>
     );
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-6 bg-[#070108]">
-      <div className="max-w-md w-full space-y-8">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-[#fdf0ee]">Register to Donate</h1>
-          <p className="mt-2 text-[rgba(253,240,238,0.55)]">Blood Donation Drive 2026</p>
+    <main className="min-h-screen bg-[#f7f7f7] py-12 px-6">
+      <div className="max-w-md mx-auto">
+        <div className="text-center mb-8">
+          <Link href="/" className="inline-flex items-center gap-2 mb-6">
+            <svg width="24" height="30" viewBox="0 0 54 66" fill="none">
+              <path d="M27 2C27 2 3 26 3 43C3 56.25 13.75 67 27 67C40.25 67 51 56.25 51 43C51 26 27 2 27 2Z" fill="#c8102e" />
+            </svg>
+            <span className="font-semibold text-[#222222]">BeTheHero</span>
+          </Link>
+          <h1 className="text-2xl font-bold text-[#222222]">Register to donate</h1>
+          <p className="mt-1.5 text-sm text-[#6a6a6a]">Blood Donation Drive · 17 June 2026</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="space-y-2">
-            <Label htmlFor="email" className="text-[#fdf0ee]">Email *</Label>
-            <Input id="email" name="email" type="email" required placeholder="you@example.com"
-              className="bg-transparent border-[rgba(200,16,46,0.3)] text-[#fdf0ee] placeholder:text-[rgba(253,240,238,0.28)]" />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="mobile" className="text-[#fdf0ee]">Mobile *</Label>
-            <Input id="mobile" name="mobile" type="tel" required placeholder="+91 98765 43210"
-              className="bg-transparent border-[rgba(200,16,46,0.3)] text-[#fdf0ee] placeholder:text-[rgba(253,240,238,0.28)]" />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="fullName" className="text-[#fdf0ee]">Full Name *</Label>
-            <Input id="fullName" name="fullName" required placeholder="Your full name"
-              className="bg-transparent border-[rgba(200,16,46,0.3)] text-[#fdf0ee] placeholder:text-[rgba(253,240,238,0.28)]" />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="company" className="text-[#fdf0ee]">Company</Label>
-            <Input id="company" name="company" placeholder="Your company (optional)"
-              className="bg-transparent border-[rgba(200,16,46,0.3)] text-[#fdf0ee] placeholder:text-[rgba(253,240,238,0.28)]" />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label className="text-[#fdf0ee]">Blood Group</Label>
-              <select name="bloodGroup" className="w-full rounded-md border border-[rgba(200,16,46,0.3)] bg-transparent text-[#fdf0ee] px-3 py-2 text-sm">
-                <option value="">Select (optional)</option>
-                {BLOOD_GROUPS.map(g => <option key={g} value={g}>{g}</option>)}
-              </select>
+        <div className="bg-white border border-[#dddddd] rounded-2xl p-6"
+          style={{ boxShadow: "rgba(0,0,0,0.02) 0 0 0 1px, rgba(0,0,0,0.04) 0 2px 6px, rgba(0,0,0,0.1) 0 4px 8px" }}>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="fullName" className="text-sm font-medium text-[#222222]">Full name *</Label>
+              <Input id="fullName" name="fullName" required placeholder="Your full name"
+                className="border-[#dddddd] text-[#222222] placeholder:text-[#929292] h-12 focus:border-[#222222] focus:ring-0 focus-visible:ring-0 focus-visible:border-[#222222]" />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="dob" className="text-[#fdf0ee]">Date of Birth</Label>
-              <Input id="dob" name="dob" type="date"
-                className="bg-transparent border-[rgba(200,16,46,0.3)] text-[#fdf0ee]" />
+
+            <div className="space-y-1.5">
+              <Label htmlFor="email" className="text-sm font-medium text-[#222222]">Email address *</Label>
+              <Input id="email" name="email" type="email" required placeholder="you@example.com"
+                className="border-[#dddddd] text-[#222222] placeholder:text-[#929292] h-12 focus:border-[#222222] focus:ring-0 focus-visible:ring-0 focus-visible:border-[#222222]" />
             </div>
-          </div>
 
-          <div className="flex items-start gap-3 pt-2">
-            <input type="checkbox" id="consentGiven" name="consentGiven" required
-              className="mt-0.5 h-4 w-4 accent-[#c8102e]" />
-            <Label htmlFor="consentGiven" className="text-sm text-[rgba(253,240,238,0.55)] leading-relaxed">
-              I consent to the collection and use of my personal data for this blood donation drive in accordance with the DPDP Act.
-            </Label>
-          </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="mobile" className="text-sm font-medium text-[#222222]">Mobile</Label>
+              <Input id="mobile" name="mobile" type="tel" placeholder="+91 98765 43210"
+                className="border-[#dddddd] text-[#222222] placeholder:text-[#929292] h-12 focus:border-[#222222] focus:ring-0 focus-visible:ring-0 focus-visible:border-[#222222]" />
+            </div>
 
-          {error && <p className="text-[#ff2442] text-sm">{error}</p>}
+            <div className="space-y-1.5">
+              <Label htmlFor="company" className="text-sm font-medium text-[#222222]">Company</Label>
+              <Input id="company" name="company" placeholder="Your company (optional)"
+                className="border-[#dddddd] text-[#222222] placeholder:text-[#929292] h-12 focus:border-[#222222] focus:ring-0 focus-visible:ring-0 focus-visible:border-[#222222]" />
+            </div>
 
-          <Button type="submit" disabled={isPending}
-            className="w-full bg-[#c8102e] hover:bg-[#ff2442] text-white font-semibold py-3">
-            {isPending ? "Registering…" : "Register to Donate →"}
-          </Button>
-        </form>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label className="text-sm font-medium text-[#222222]">Blood group</Label>
+                <select name="bloodGroup"
+                  className="w-full h-12 px-3 rounded-lg border border-[#dddddd] bg-white text-sm text-[#222222] focus:outline-none focus:border-[#222222]">
+                  <option value="">Unknown</option>
+                  {BLOOD_GROUPS.map(g => <option key={g} value={g}>{g}</option>)}
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="dob" className="text-sm font-medium text-[#222222]">Date of birth</Label>
+                <Input id="dob" name="dob" type="date"
+                  className="border-[#dddddd] text-[#222222] h-12 focus:border-[#222222] focus:ring-0 focus-visible:ring-0 focus-visible:border-[#222222]" />
+              </div>
+            </div>
 
-        <p className="text-center text-sm text-[rgba(253,240,238,0.28)]">
+            <div className="flex items-start gap-3 pt-1">
+              <input type="checkbox" id="consentGiven" name="consentGiven" required
+                className="mt-0.5 h-4 w-4 accent-[#c8102e] rounded" />
+              <Label htmlFor="consentGiven" className="text-sm text-[#6a6a6a] leading-relaxed cursor-pointer">
+                I consent to the collection and use of my personal data for this blood donation drive in accordance with the DPDP Act.
+              </Label>
+            </div>
+
+            {error && <p className="text-[#c13515] text-sm">{error}</p>}
+
+            <Button type="submit" disabled={isPending}
+              className="w-full h-12 bg-[#c8102e] hover:bg-[#a50d27] text-white font-medium rounded-lg">
+              {isPending ? "Registering…" : "Register to donate →"}
+            </Button>
+          </form>
+        </div>
+
+        <p className="text-center text-sm text-[#6a6a6a] mt-6">
           Already registered?{" "}
-          <Link href="/login" className="text-[#c8102e] hover:underline">Log in</Link>
+          <Link href="/login" className="text-[#c8102e] hover:underline font-medium">Log in</Link>
         </p>
       </div>
     </main>

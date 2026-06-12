@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 
 interface Event { id: string; name: string; status: string }
 interface Admin { name: string; role: string }
@@ -12,51 +13,131 @@ interface Props {
 }
 
 const NAV = [
-  { href: "/admin",           label: "Dashboard" },
-  { href: "/admin/events",    label: "Events" },
-  { href: "/admin/scan",      label: "Scanner" },
-  { href: "/admin/attendees", label: "Attendees" },
-  { href: "/admin/users",     label: "Donors" },
-  { href: "/admin/reports",   label: "Reports" },
+  { href: "/admin",           label: "Dashboard",  icon: "📊" },
+  { href: "/admin/events",    label: "Events",     icon: "📅" },
+  { href: "/admin/scan",      label: "Scanner",    icon: "📷" },
+  { href: "/admin/attendees", label: "Attendees",  icon: "🩸" },
+  { href: "/admin/users",     label: "Donors",     icon: "👥" },
+  { href: "/admin/reports",   label: "Reports",    icon: "📋" },
 ];
 
 export function AdminSidebar({ admin, events, currentEventId }: Props) {
   const pathname = usePathname();
   const activeEvent = events.find(e => e.id === currentEventId);
+  const [open, setOpen] = useState(false);
 
-  return (
-    <aside className="w-56 flex flex-col border-r border-[rgba(200,16,46,0.15)] bg-[#0a0109]">
-      <div className="p-4 border-b border-[rgba(200,16,46,0.15)]">
-        <p className="text-xs text-[rgba(253,240,238,0.3)] uppercase tracking-widest">Admin</p>
-        <p className="font-semibold text-sm mt-0.5 text-[#fdf0ee]">{admin.name}</p>
-        <p className="text-xs text-[rgba(253,240,238,0.3)]">{admin.role}</p>
+  const navContent = (
+    <>
+      <div className="p-4 border-b border-gray-100">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-[#c8102e] flex items-center justify-center text-white font-bold text-sm">
+            {admin.name.charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <p className="font-semibold text-sm text-gray-900">{admin.name}</p>
+            <p className="text-xs text-gray-400 capitalize">{admin.role}</p>
+          </div>
+        </div>
       </div>
 
       {activeEvent && (
-        <div className="p-3 mx-3 mt-3 rounded-lg bg-[rgba(200,16,46,0.1)] border border-[rgba(200,16,46,0.2)]">
-          <p className="text-[10px] text-[rgba(253,240,238,0.3)] uppercase tracking-widest">Active Drive</p>
-          <p className="text-xs font-medium mt-0.5 text-[#ff2442]">{activeEvent.name}</p>
+        <div className="mx-3 mt-3 px-3 py-2 rounded-lg bg-red-50 border border-red-100">
+          <p className="text-[10px] text-red-400 uppercase tracking-widest font-medium">Active Drive</p>
+          <p className="text-xs font-semibold mt-0.5 text-[#c8102e] truncate">{activeEvent.name}</p>
         </div>
       )}
 
-      <nav className="flex-1 p-3 space-y-1 mt-2">
-        {NAV.map(({ href, label }) => (
-          <Link key={href} href={href}
-            className={`block px-3 py-2 rounded-lg text-sm transition-colors
+      <nav className="flex-1 p-3 space-y-0.5 mt-2">
+        {NAV.map(({ href, label, icon }) => (
+          <Link key={href} href={href} onClick={() => setOpen(false)}
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
               ${pathname === href
-                ? "bg-[rgba(200,16,46,0.2)] text-[#ff2442]"
-                : "text-[rgba(253,240,238,0.55)] hover:text-[#fdf0ee] hover:bg-[rgba(200,16,46,0.08)]"
+                ? "bg-red-50 text-[#c8102e]"
+                : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
               }`}>
+            <span className="text-base">{icon}</span>
             {label}
           </Link>
         ))}
       </nav>
 
-      <div className="p-3 border-t border-[rgba(200,16,46,0.15)]">
-        <Link href="/" className="text-xs text-[rgba(253,240,238,0.3)] hover:text-[rgba(253,240,238,0.55)]">
-          ← Public site
+      <div className="p-3 border-t border-gray-100">
+        <Link href="/" className="flex items-center gap-2 text-xs text-gray-400 hover:text-gray-600 transition-colors">
+          <span>←</span> Public site
         </Link>
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* Mobile top bar */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-30 bg-white border-b border-gray-100 px-4 h-14 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-[#c8102e] font-bold text-lg">🩸</span>
+          <span className="font-bold text-gray-900 text-sm">BeTheHero Admin</span>
+        </div>
+        <button onClick={() => setOpen(!open)} className="p-2 rounded-lg hover:bg-gray-100 text-gray-600">
+          {open ? "✕" : "☰"}
+        </button>
+      </div>
+
+      {/* Mobile overlay */}
+      {open && (
+        <div className="md:hidden fixed inset-0 z-20 bg-black/30" onClick={() => setOpen(false)} />
+      )}
+
+      {/* Mobile drawer */}
+      <aside className={`md:hidden fixed top-14 left-0 bottom-0 z-20 w-64 bg-white border-r border-gray-100 flex flex-col transition-transform duration-200
+        ${open ? "translate-x-0" : "-translate-x-full"}`}>
+        {navContent}
+      </aside>
+
+      {/* Desktop sidebar */}
+      <aside className="hidden md:flex w-60 flex-col border-r border-gray-100 bg-white shrink-0">
+        <div className="p-4 border-b border-gray-100">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-[#c8102e] font-bold text-xl">🩸</span>
+            <span className="font-bold text-gray-900">BeTheHero</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-[#c8102e] flex items-center justify-center text-white font-bold text-sm shrink-0">
+              {admin.name.charAt(0).toUpperCase()}
+            </div>
+            <div className="min-w-0">
+              <p className="font-semibold text-sm text-gray-900 truncate">{admin.name}</p>
+              <p className="text-xs text-gray-400 capitalize">{admin.role}</p>
+            </div>
+          </div>
+        </div>
+
+        {activeEvent && (
+          <div className="mx-3 mt-3 px-3 py-2 rounded-lg bg-red-50 border border-red-100">
+            <p className="text-[10px] text-red-400 uppercase tracking-widest font-medium">Active Drive</p>
+            <p className="text-xs font-semibold mt-0.5 text-[#c8102e] truncate">{activeEvent.name}</p>
+          </div>
+        )}
+
+        <nav className="flex-1 p-3 space-y-0.5 mt-2">
+          {NAV.map(({ href, label, icon }) => (
+            <Link key={href} href={href}
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
+                ${pathname === href
+                  ? "bg-red-50 text-[#c8102e]"
+                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                }`}>
+              <span className="text-base">{icon}</span>
+              {label}
+            </Link>
+          ))}
+        </nav>
+
+        <div className="p-3 border-t border-gray-100">
+          <Link href="/" className="flex items-center gap-2 text-xs text-gray-400 hover:text-gray-600 transition-colors">
+            <span>←</span> Public site
+          </Link>
+        </div>
+      </aside>
+    </>
   );
 }

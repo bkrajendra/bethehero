@@ -32,12 +32,12 @@ function useAnimatedCounter(target: number, duration = 600) {
   return current;
 }
 
-export function KPICard({ label, value, suffix = "", color = "#fdf0ee" }: Props) {
+export function KPICard({ label, value, suffix = "", color = "#c8102e" }: Props) {
   const animated = useAnimatedCounter(value);
 
   return (
-    <div className="border border-[rgba(200,16,46,0.2)] rounded-xl p-5 space-y-1 bg-[rgba(200,16,46,0.03)]">
-      <p className="text-xs text-[rgba(253,240,238,0.3)] uppercase tracking-widest">{label}</p>
+    <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm space-y-1">
+      <p className="text-xs text-gray-400 uppercase tracking-widest font-medium">{label}</p>
       <p className="text-3xl font-bold tabular-nums" style={{ color }}>
         {animated.toLocaleString()}{suffix}
       </p>

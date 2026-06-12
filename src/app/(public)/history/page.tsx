@@ -1,16 +1,14 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import Link from "next/link";
 
-const STATUS_BADGE: Record<string, string> = {
-  registered: "bg-blue-500/20 text-blue-300",
-  confirmed:  "bg-yellow-500/20 text-yellow-300",
-  checked_in: "bg-orange-500/20 text-orange-300",
-  donated:    "bg-green-500/20 text-green-300",
-  deferred:   "bg-red-500/20 text-red-300",
-  no_show:    "bg-gray-500/20 text-gray-400",
+const STATUS_STYLES: Record<string, string> = {
+  registered: "bg-blue-50 text-blue-700 border border-blue-100",
+  confirmed:  "bg-yellow-50 text-yellow-700 border border-yellow-100",
+  checked_in: "bg-orange-50 text-orange-700 border border-orange-100",
+  donated:    "bg-green-50 text-green-700 border border-green-100",
+  deferred:   "bg-red-50 text-red-700 border border-red-100",
+  no_show:    "bg-gray-50 text-gray-500 border border-gray-200",
 };
 
 export default function HistoryPage() {
@@ -24,38 +22,47 @@ export default function HistoryPage() {
   });
 
   if (isLoading) return (
-    <main className="min-h-screen flex items-center justify-center bg-[#070108]">
-      <div className="animate-pulse text-[rgba(253,240,238,0.3)]">Loading…</div>
+    <main className="min-h-screen bg-[#f7f7f7] flex items-center justify-center">
+      <div className="flex gap-1">
+        {[0,1,2].map(i => <div key={i} className="w-2 h-2 rounded-full bg-[#dddddd] animate-pulse" style={{ animationDelay: `${i*150}ms` }} />)}
+      </div>
     </main>
   );
 
   const attendees: any[] = data?.attendees ?? [];
 
   return (
-    <main className="min-h-screen p-6 bg-[#070108]">
+    <main className="min-h-screen bg-[#f7f7f7] py-12 px-6">
       <div className="max-w-lg mx-auto space-y-6">
-        <h1 className="text-2xl font-bold text-[#fdf0ee]">Donation History</h1>
+        <div className="flex items-center gap-4">
+          <Link href="/status" className="text-sm text-[#6a6a6a] hover:text-[#222222]">← Back</Link>
+          <h1 className="text-2xl font-bold text-[#222222]">Donation History</h1>
+        </div>
+
         {attendees.length === 0 ? (
-          <p className="text-[rgba(253,240,238,0.55)]">No donation history yet.</p>
+          <div className="bg-white border border-[#dddddd] rounded-2xl p-8 text-center">
+            <p className="text-[#6a6a6a]">No donation history yet.</p>
+          </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {attendees.map((a: any) => (
-              <div key={a.id} className="border border-[rgba(200,16,46,0.2)] rounded-xl p-4 space-y-2">
+              <div key={a.id} className="bg-white border border-[#dddddd] rounded-xl p-5 space-y-3"
+                style={{ boxShadow: "rgba(0,0,0,0.02) 0 0 0 1px, rgba(0,0,0,0.04) 0 2px 6px" }}>
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="font-semibold text-[#fdf0ee]">{a.event?.name}</p>
-                    <p className="text-sm text-[rgba(253,240,238,0.55)]">{a.event?.venue}</p>
-                    <p className="text-xs text-[rgba(253,240,238,0.3)]">
-                      {new Date(a.event?.startAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}
+                    <p className="font-semibold text-[#222222]">{a.event?.name}</p>
+                    <p className="text-sm text-[#6a6a6a]">{a.event?.venue}</p>
+                    <p className="text-xs text-[#929292] mt-0.5">
+                      {new Date(a.event?.startAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Kolkata" })}
                     </p>
                   </div>
-                  <span className={`text-xs px-2 py-1 rounded-full capitalize ${STATUS_BADGE[a.status] ?? ""}`}>
+                  <span className={`text-xs px-2.5 py-1 rounded-full font-medium capitalize ${STATUS_STYLES[a.status] ?? "bg-gray-50 text-gray-500"}`}>
                     {a.status.replace("_", " ")}
                   </span>
                 </div>
                 {a.status === "donated" && (
                   <Link href={`/certificate/${a.id}`}
-                    className={cn(buttonVariants({ size: "sm" }), "bg-[#c8102e] hover:bg-[#ff2442]")}>
+                    className="inline-flex items-center justify-center h-9 px-4 bg-[#c8102e] hover:bg-[#a50d27] text-white font-medium rounded-lg text-xs transition-colors">
                     Download Certificate
                   </Link>
                 )}

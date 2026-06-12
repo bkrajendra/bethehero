@@ -5,6 +5,11 @@ import { requireAdmin } from "@/lib/auth/server";
 import { createEvent, updateEvent, setActiveEvent } from "@/lib/db/queries/events";
 import { writeAuditLog } from "@/lib/db/queries/audit";
 
+/** Convert a datetime-local string (no tz) to a Date in IST (UTC+5:30). */
+function parseIst(dtLocal: string): Date {
+  return new Date(`${dtLocal}:00+05:30`);
+}
+
 const EventSchema = z.object({
   name:                      z.string().min(3),
   venue:                     z.string().min(3),
@@ -26,8 +31,8 @@ export async function createEventAction(formData: FormData) {
 
   const event = await createEvent({
     ...parsed.data,
-    startAt: new Date(parsed.data.startAt),
-    endAt: new Date(parsed.data.endAt),
+    startAt: parseIst(parsed.data.startAt),
+    endAt: parseIst(parsed.data.endAt),
     status: "draft",
   });
   await writeAuditLog({ actorAdminId: adminId, action: "create_event", targetTable: "events", targetId: event.id });
@@ -56,6 +61,21 @@ export async function closeEventAction(eventId: string) {
   const { adminId } = await requireAdmin();
   await updateEvent(eventId, { status: "closed" });
   await writeAuditLog({ actorAdminId: adminId, action: "close_event", targetTable: "events", targetId: eventId });
+  revalidatePath("/admin/events");
+  return { success: true };
+}
+
+export async function updateEventDetailsAction(eventId: string, formData: FormData) {
+  const { adminId } = await requireAdmin();
+  const parsed = EventSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+
+  await updateEvent(eventId, {
+    ...parsed.data,
+    startAt: parseIst(parsed.data.startAt),
+    endAt: parseIst(parsed.data.endAt),
+  });
+  await writeAuditLog({ actorAdminId: adminId, action: "update_event", targetTable: "events", targetId: eventId });
   revalidatePath("/admin/events");
   return { success: true };
 }

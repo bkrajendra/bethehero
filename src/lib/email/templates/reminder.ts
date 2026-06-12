@@ -8,8 +8,8 @@ export interface ReminderParams {
 }
 
 export function reminderEmailHtml(p: ReminderParams): string {
-  const dateStr = p.startAt.toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
-  const timeStr = p.startAt.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+  const dateStr = p.startAt.toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric", timeZone: "Asia/Kolkata" });
+  const timeStr = p.startAt.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Kolkata" });
   const badgeUrl = `${p.appUrl}/badge/${p.badgeToken}`;
 
   return `<!DOCTYPE html>
