@@ -173,7 +173,11 @@ export default async function Home() {
               <>Organised by <strong className="text-[#6a6a6a]">{event.organiserName}</strong> in association with <strong className="text-[#6a6a6a]">{event.bloodBankName}</strong></>
             ) : "BeTheHero Blood Donation Platform"}
           </p>
-          <p className="text-xs text-[#929292]">© 2026 BeTheHero</p>
+          <div className="flex items-center gap-4">
+            <p className="text-xs text-[#929292]">© 2026 BeTheHero</p>
+            <Link href="/privacy" className="text-xs text-[#929292] hover:text-[#c8102e] transition-colors">Privacy</Link>
+            <Link href="/terms" className="text-xs text-[#929292] hover:text-[#c8102e] transition-colors">Terms</Link>
+          </div>
         </div>
       </footer>
     </div>

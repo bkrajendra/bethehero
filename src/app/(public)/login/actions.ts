@@ -2,6 +2,21 @@
 import { createSupabaseServerClient } from "@/lib/auth/server";
 import { getDonorByEmail, linkDonorToAuthUser } from "@/lib/db/queries/donors";
 
+export async function signInWithProvider(
+  provider: "google" | "github",
+): Promise<{ url?: string; error?: string }> {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider,
+    options: {
+      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback?next=/status`,
+      skipBrowserRedirect: true,
+    },
+  });
+  if (error) return { error: error.message };
+  return { url: data.url };
+}
+
 export async function sendOtp(email: string): Promise<{ error?: string }> {
   if (!email || !email.includes("@")) return { error: "Invalid email" };
   const supabase = await createSupabaseServerClient();

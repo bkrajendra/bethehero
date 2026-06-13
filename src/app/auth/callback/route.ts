@@ -11,13 +11,26 @@ export async function GET(request: NextRequest) {
     const supabase = await createSupabaseServerClient();
     const { data: { user }, error } = await supabase.auth.exchangeCodeForSession(code);
 
-    if (!error && user?.email) {
-      const donor = await getDonorByEmail(user.email);
-      if (donor && !donor.authUserId) {
-        await linkDonorToAuthUser(donor.id, user.id);
-      }
-    } else if (error) {
+    if (error) {
       return NextResponse.redirect(`${origin}/login?error=auth_failed`);
+    }
+
+    if (user?.email) {
+      const donor = await getDonorByEmail(user.email);
+      if (donor) {
+        // Link auth user if not already linked (first OAuth sign-in)
+        if (!donor.authUserId) {
+          await linkDonorToAuthUser(donor.id, user.id);
+        }
+      } else {
+        // No donor record — send to registration with email pre-filled
+        const registerUrl = new URL(`${origin}/register`);
+        registerUrl.searchParams.set("email", user.email);
+        // Pass display name from OAuth provider if available
+        const name = user.user_metadata?.full_name ?? user.user_metadata?.name ?? "";
+        if (name) registerUrl.searchParams.set("name", name);
+        return NextResponse.redirect(registerUrl.toString());
+      }
     }
   }
 
