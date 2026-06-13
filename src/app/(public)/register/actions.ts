@@ -9,7 +9,7 @@ import { confirmationEmailHtml } from "@/lib/email/templates/confirmation";
 
 const RegisterSchema = z.object({
   email:        z.string().email().toLowerCase(),
-  mobile:       z.string().min(10).max(15),
+  mobile:       z.string().min(10).max(15).optional(),
   fullName:     z.string().min(2).max(100),
   company:      z.string().max(100).optional(),
   bloodGroup:   z.enum(["A+","A-","B+","B-","AB+","AB-","O+","O-"]).optional(),
@@ -26,7 +26,7 @@ export type RegisterResult =
 export async function registerDonor(formData: FormData): Promise<RegisterResult> {
   const raw = {
     email:        formData.get("email"),
-    mobile:       formData.get("mobile"),
+    mobile:       formData.get("mobile") || undefined,
     fullName:     formData.get("fullName"),
     company:      formData.get("company") || undefined,
     bloodGroup:   formData.get("bloodGroup") || undefined,
@@ -43,7 +43,7 @@ export async function registerDonor(formData: FormData): Promise<RegisterResult>
 
   const { donor, created } = await upsertDonorByEmail({
     email:          data.email,
-    mobile:         data.mobile,
+    mobile:         data.mobile ?? "",
     fullName:       data.fullName,
     company:        data.company ?? null,
     bloodGroup:     (data.bloodGroup ?? null) as "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-" | null,

@@ -2,6 +2,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { StatusTimeline } from "@/components/StatusTimeline";
 import { DonationCelebration } from "@/components/DonationCelebration";
+import { PushSubscribeCard } from "@/components/PushSubscribeCard";
+import { UserRound } from "lucide-react";
 import Link from "next/link";
 
 async function fetchStatus() {
@@ -52,6 +54,15 @@ export default function StatusPage() {
   return (
     <main className="min-h-screen bg-[#f7f7f7] flex items-center justify-center p-6">
       <div className="w-full max-w-sm space-y-3">
+
+        {/* Profile link */}
+        <div className="flex justify-end">
+          <Link href="/profile"
+            className="inline-flex items-center gap-1.5 text-xs text-[#6a6a6a] hover:text-[#222222] transition-colors py-1">
+            <UserRound size={13} />
+            Edit profile
+          </Link>
+        </div>
 
         {/* Badge card */}
         <div className="bg-white border border-[#dddddd] rounded-2xl overflow-hidden"
@@ -105,6 +116,10 @@ export default function StatusPage() {
             {event.venue} · {new Date(event.startAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Kolkata" })}
           </div>
         </div>
+
+        {(attendee.status === "registered" || attendee.status === "confirmed") && (
+          <PushSubscribeCard donorId={attendee.donorId} />
+        )}
 
         <div className="text-center">
           <Link href="/history" className="text-sm text-[#c8102e] hover:underline font-medium">
