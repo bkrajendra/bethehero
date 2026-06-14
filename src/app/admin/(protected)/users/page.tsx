@@ -3,6 +3,11 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/components/admin/ToastProvider";
 
 interface DonorAttendee {
@@ -28,12 +33,12 @@ interface DonorEntry {
 const BLOOD_GROUPS = ["A+","A-","B+","B-","AB+","AB-","O+","O-"];
 
 const STATUS_STYLES: Record<string, string> = {
-  registered: "bg-blue-50 text-blue-600",
-  confirmed:  "bg-yellow-50 text-yellow-600",
-  checked_in: "bg-orange-50 text-orange-600",
-  donated:    "bg-green-50 text-green-600",
-  deferred:   "bg-red-50 text-red-600",
-  no_show:    "bg-gray-50 text-gray-500",
+  registered: "bg-blue-50 text-blue-600 border-blue-200",
+  confirmed:  "bg-yellow-50 text-yellow-600 border-yellow-200",
+  checked_in: "bg-orange-50 text-orange-600 border-orange-200",
+  donated:    "bg-green-50 text-green-600 border-green-200",
+  deferred:   "bg-red-50 text-red-600 border-red-200",
+  no_show:    "bg-gray-50 text-gray-500 border-gray-200",
 };
 
 async function donorPatch(body: object) {
@@ -53,56 +58,66 @@ async function resendActivation(donorIds: string[]) {
 }
 
 // ── Edit Dialog ──────────────────────────────────────────────────────────────
-function EditDonorDialog({ donor, onClose }: { donor: DonorEntry; onClose: () => void }) {
+function EditDonorDialog({ donor, onClose }: { donor: DonorEntry | null; onClose: () => void }) {
   const qc = useQueryClient();
   const { toast } = useToast();
   const [form, setForm] = useState({
-    fullName: donor.fullName,
-    mobile: donor.mobile,
-    company: donor.company ?? "",
-    bloodGroup: donor.bloodGroup ?? "",
-    dob: donor.dob ?? "",
+    fullName: donor?.fullName ?? "",
+    mobile: donor?.mobile ?? "",
+    company: donor?.company ?? "",
+    bloodGroup: donor?.bloodGroup ?? "",
+    dob: donor?.dob ?? "",
   });
   const [error, setError] = useState("");
   const mut = useMutation({
-    mutationFn: (data: typeof form) => donorPatch({ action: "update", donorId: donor.id, data }),
+    mutationFn: (data: typeof form) => donorPatch({ action: "update", donorId: donor?.id, data }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["adminDonors"] }); onClose(); toast("Donor updated"); },
     onError: (e: Error) => setError(e.message),
   });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 space-y-4">
-        <h2 className="text-lg font-bold text-[#222222]">Edit Donor</h2>
-        <p className="text-sm text-[#929292]">{donor.email}</p>
-        <div className="space-y-3">
-          {([ ["Full Name","fullName","text"], ["Mobile","mobile","tel"], ["Company","company","text"], ["Date of Birth","dob","date"] ] as [string,string,string][]).map(([label,key,type]) => (
-            <div key={key}>
-              <label className="text-xs font-medium text-[#6a6a6a] block mb-1">{label}</label>
-              <Input type={type} value={(form as Record<string,string>)[key]}
-                onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
-                className="border-[#dddddd] text-[#222222]" />
+    <Dialog open={!!donor} onOpenChange={(open) => { if (!open) onClose(); }}>
+      <DialogContent className="bg-white border border-gray-100 text-gray-900 max-w-md">
+        <DialogHeader>
+          <DialogTitle className="text-gray-900">Edit Donor</DialogTitle>
+        </DialogHeader>
+        {donor && (
+          <>
+            <p className="text-sm text-[#929292] -mt-2">{donor.email}</p>
+            <div className="space-y-3">
+              {([ ["Full Name","fullName","text"], ["Mobile","mobile","tel"], ["Company","company","text"], ["Date of Birth","dob","date"] ] as [string,string,string][]).map(([label,key,type]) => (
+                <div key={key}>
+                  <Label className="text-xs font-medium text-[#6a6a6a] block mb-1">{label}</Label>
+                  <Input type={type} value={(form as Record<string,string>)[key]}
+                    onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
+                    className="border-[#dddddd] text-[#222222]" />
+                </div>
+              ))}
+              <div>
+                <Label className="text-xs font-medium text-[#6a6a6a] block mb-1">Blood Group</Label>
+                <Select value={form.bloodGroup} onValueChange={(v) => setForm(f => ({ ...f, bloodGroup: v ?? "" }))}>
+                  <SelectTrigger className="w-full h-10">
+                    <SelectValue placeholder="Unknown" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Unknown</SelectItem>
+                    {BLOOD_GROUPS.map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-          ))}
-          <div>
-            <label className="text-xs font-medium text-[#6a6a6a] block mb-1">Blood Group</label>
-            <select value={form.bloodGroup} onChange={e => setForm(f => ({ ...f, bloodGroup: e.target.value }))}
-              className="w-full h-10 rounded-lg border border-[#dddddd] px-3 text-sm text-[#222222] bg-white">
-              <option value="">Unknown</option>
-              {BLOOD_GROUPS.map(g => <option key={g} value={g}>{g}</option>)}
-            </select>
-          </div>
-        </div>
-        {error && <p className="text-xs text-[#c8102e]">{error}</p>}
-        <div className="flex gap-3 pt-2">
-          <Button onClick={() => mut.mutate(form)} disabled={mut.isPending}
-            className="flex-1 bg-[#c8102e] hover:bg-[#a50d27] text-white h-10">
-            {mut.isPending ? "Saving…" : "Save"}
-          </Button>
-          <Button variant="outline" onClick={onClose} className="flex-1 border-[#dddddd] h-10">Cancel</Button>
-        </div>
-      </div>
-    </div>
+            {error && <p className="text-xs text-[#c8102e]">{error}</p>}
+            <div className="flex gap-3 pt-2">
+              <Button onClick={() => mut.mutate(form)} disabled={mut.isPending}
+                className="flex-1 bg-[#c8102e] hover:bg-[#a50d27] text-white h-10">
+                {mut.isPending ? "Saving…" : "Save"}
+              </Button>
+              <Button variant="outline" onClick={onClose} className="flex-1 border-[#dddddd] h-10">Cancel</Button>
+            </div>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -171,7 +186,7 @@ export default function UsersPage() {
 
   return (
     <div className="space-y-6">
-      {editDonor && <EditDonorDialog donor={editDonor} onClose={() => setEditDonor(null)} />}
+      <EditDonorDialog key={editDonor?.id ?? "none"} donor={editDonor} onClose={() => setEditDonor(null)} />
 
       <div className="flex justify-between items-start flex-wrap gap-3">
         <div>
@@ -195,14 +210,15 @@ export default function UsersPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-[#dddddd]">
-        {TABS.map(t => (
-          <button key={t.key} onClick={() => { setTab(t.key); setSelected(new Set()); setSearch(""); }}
-            className={`px-5 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px whitespace-nowrap ${tab === t.key ? "border-[#c8102e] text-[#c8102e]" : "border-transparent text-[#6a6a6a] hover:text-[#222222]"}`}>
-            {t.label}{(t.count ?? 0) > 0 ? ` (${t.count})` : ""}
-          </button>
-        ))}
-      </div>
+      <Tabs value={tab} onValueChange={(v) => { setTab(v as Tab); setSelected(new Set()); setSearch(""); }}>
+        <TabsList variant="line" className="w-full justify-start rounded-none bg-transparent h-auto p-0 border-b border-[#dddddd]">
+          {TABS.map(t => (
+            <TabsTrigger key={t.key} value={t.key} className="rounded-none px-5 py-2.5 text-sm font-medium">
+              {t.label}{(t.count ?? 0) > 0 ? ` (${t.count})` : ""}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
 
       {/* Search + bulk actions */}
       <div className="flex flex-wrap gap-3 items-center">
@@ -258,9 +274,9 @@ export default function UsersPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="font-semibold text-[#222222]">{d.fullName}</p>
-                      {d.bloodGroup && <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-50 text-[#c8102e] border border-red-100 font-medium">{d.bloodGroup}</span>}
-                      {inActiveEvent && <span className="text-[10px] px-2 py-0.5 rounded-full bg-green-50 text-green-600 border border-green-100 font-medium">In Active Event</span>}
-                      {tab === "unverified" && <span className="text-[10px] px-2 py-0.5 rounded-full bg-yellow-50 text-yellow-600 border border-yellow-100 font-medium">Not Activated</span>}
+                      {d.bloodGroup && <Badge variant="outline" className="text-[10px] bg-red-50 text-[#c8102e] border-red-100">{d.bloodGroup}</Badge>}
+                      {inActiveEvent && <Badge variant="outline" className="text-[10px] bg-green-50 text-green-600 border-green-100">In Active Event</Badge>}
+                      {tab === "unverified" && <Badge variant="outline" className="text-[10px] bg-yellow-50 text-yellow-600 border-yellow-100">Not Activated</Badge>}
                     </div>
                     <p className="text-sm text-[#6a6a6a]">{d.email}</p>
                     <p className="text-xs text-[#929292]">
@@ -275,9 +291,9 @@ export default function UsersPage() {
                     {(d.attendees?.length ?? 0) > 0 && (
                       <div className="flex gap-1.5 flex-wrap mt-1.5">
                         {d.attendees?.map(a => (
-                          <span key={a.id} className={`text-[10px] px-2 py-0.5 rounded-full capitalize ${STATUS_STYLES[a.status] ?? "bg-gray-50 text-gray-500"}`}>
+                          <Badge key={a.id} variant="outline" className={`text-[10px] capitalize ${STATUS_STYLES[a.status] ?? "bg-gray-50 text-gray-500 border-gray-200"}`}>
                             {a.event?.name?.slice(0, 22)} — {a.status.replace("_"," ")}
-                          </span>
+                          </Badge>
                         ))}
                       </div>
                     )}
@@ -286,37 +302,43 @@ export default function UsersPage() {
                   <div className="flex flex-col gap-1.5 shrink-0">
                     {tab === "active" && (
                       <>
-                        <button onClick={() => setEditDonor(d)}
-                          className="text-xs px-3 py-1 rounded-lg border border-[#dddddd] text-[#6a6a6a] hover:bg-[#f7f7f7] transition-colors">Edit</button>
+                        <Button variant="outline" size="sm" onClick={() => setEditDonor(d)}
+                          className="border-[#dddddd] text-[#6a6a6a] hover:bg-[#f7f7f7]">Edit</Button>
                         {inActiveEvent ? (
-                          <button onClick={() => { if (confirm("Remove from active event?")) mut.mutate({ action: "remove_event", donorId: d.id }); }}
+                          <Button variant="outline" size="sm"
+                            onClick={() => { if (confirm("Remove from active event?")) mut.mutate({ action: "remove_event", donorId: d.id }); }}
                             disabled={mut.isPending}
-                            className="text-xs px-3 py-1 rounded-lg border border-orange-200 text-orange-600 hover:bg-orange-50 transition-colors">Remove Event</button>
+                            className="border-orange-200 text-orange-600 hover:bg-orange-50">Remove Event</Button>
                         ) : (
-                          <button onClick={() => mut.mutate({ action: "assign_event", donorId: d.id })}
+                          <Button variant="outline" size="sm"
+                            onClick={() => mut.mutate({ action: "assign_event", donorId: d.id })}
                             disabled={mut.isPending}
-                            className="text-xs px-3 py-1 rounded-lg border border-green-200 text-green-700 hover:bg-green-50 transition-colors">Add to Event</button>
+                            className="border-green-200 text-green-700 hover:bg-green-50">Add to Event</Button>
                         )}
-                        <button onClick={() => { if (confirm(`Delete ${d.fullName}?`)) mut.mutate({ action: "soft_delete", donorId: d.id }); }}
+                        <Button variant="outline" size="sm"
+                          onClick={() => { if (confirm(`Delete ${d.fullName}?`)) mut.mutate({ action: "soft_delete", donorId: d.id }); }}
                           disabled={mut.isPending}
-                          className="text-xs px-3 py-1 rounded-lg border border-red-100 text-[#c8102e] hover:bg-red-50 transition-colors">Delete</button>
+                          className="border-red-100 text-[#c8102e] hover:bg-red-50">Delete</Button>
                       </>
                     )}
                     {tab === "unverified" && (
-                      <button onClick={() => activationMut.mutate([d.id])}
+                      <Button variant="outline" size="sm"
+                        onClick={() => activationMut.mutate([d.id])}
                         disabled={activationMut.isPending}
-                        className="text-xs px-3 py-1 rounded-lg border border-[#c8102e] text-[#c8102e] hover:bg-red-50 transition-colors whitespace-nowrap">
+                        className="border-[#c8102e] text-[#c8102e] hover:bg-red-50 whitespace-nowrap">
                         Send Activation
-                      </button>
+                      </Button>
                     )}
                     {tab === "deleted" && (
                       <>
-                        <button onClick={() => mut.mutate({ action: "restore", donorId: d.id })}
+                        <Button variant="outline" size="sm"
+                          onClick={() => mut.mutate({ action: "restore", donorId: d.id })}
                           disabled={mut.isPending}
-                          className="text-xs px-3 py-1 rounded-lg border border-green-200 text-green-700 hover:bg-green-50 transition-colors">Restore</button>
-                        <button onClick={() => { if (confirm(`Permanently delete ${d.fullName} and all their history?`)) mut.mutate({ action: "hard_delete", donorId: d.id }); }}
+                          className="border-green-200 text-green-700 hover:bg-green-50">Restore</Button>
+                        <Button variant="outline" size="sm"
+                          onClick={() => { if (confirm(`Permanently delete ${d.fullName} and all their history?`)) mut.mutate({ action: "hard_delete", donorId: d.id }); }}
                           disabled={mut.isPending}
-                          className="text-xs px-3 py-1 rounded-lg border border-red-200 text-red-700 hover:bg-red-50 transition-colors">Purge</button>
+                          className="border-red-200 text-red-700 hover:bg-red-50">Purge</Button>
                       </>
                     )}
                   </div>

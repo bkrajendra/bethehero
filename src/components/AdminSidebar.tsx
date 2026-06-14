@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { LayoutDashboard, CalendarDays, ScanLine, Droplets, Users, FileBarChart } from "lucide-react";
 
 interface Event { id: string; name: string; status: string }
 interface Admin { name: string; role: string }
@@ -14,12 +15,12 @@ interface Props {
 }
 
 const NAV = [
-  { href: "/admin",           label: "Dashboard",  icon: "📊" },
-  { href: "/admin/events",    label: "Events",     icon: "📅" },
-  { href: "/admin/scan",      label: "Scanner",    icon: "📷" },
-  { href: "/admin/attendees", label: "Attendees",  icon: "🩸" },
-  { href: "/admin/users",     label: "Donors",     icon: "👥" },
-  { href: "/admin/reports",   label: "Reports",    icon: "📋" },
+  { href: "/admin",           label: "Dashboard",  icon: LayoutDashboard },
+  { href: "/admin/events",    label: "Events",     icon: CalendarDays },
+  { href: "/admin/scan",      label: "Scanner",    icon: ScanLine },
+  { href: "/admin/attendees", label: "Attendees",  icon: Droplets },
+  { href: "/admin/users",     label: "Donors",     icon: Users },
+  { href: "/admin/reports",   label: "Reports",    icon: FileBarChart },
 ];
 
 export function AdminSidebar({ admin, events, currentEventId }: Props) {
@@ -49,14 +50,14 @@ export function AdminSidebar({ admin, events, currentEventId }: Props) {
       )}
 
       <nav className="flex-1 p-3 space-y-0.5 mt-2">
-        {NAV.map(({ href, label, icon }) => (
+        {NAV.map(({ href, label, icon: Icon }) => (
           <Link key={href} href={href} onClick={() => setOpen(false)}
             className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
               ${pathname === href
                 ? "bg-red-50 text-[#c8102e]"
                 : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
               }`}>
-            <span className="text-base">{icon}</span>
+            <Icon size={16} strokeWidth={1.75} />
             {label}
           </Link>
         ))}
@@ -120,14 +121,14 @@ export function AdminSidebar({ admin, events, currentEventId }: Props) {
         )}
 
         <nav className="flex-1 p-3 space-y-0.5 mt-2">
-          {NAV.map(({ href, label, icon }) => (
+          {NAV.map(({ href, label, icon: Icon }) => (
             <Link key={href} href={href}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
                 ${pathname === href
                   ? "bg-red-50 text-[#c8102e]"
                   : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                 }`}>
-              <span className="text-base">{icon}</span>
+              <Icon size={16} strokeWidth={1.75} />
               {label}
             </Link>
           ))}

@@ -1,6 +1,7 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
 import { KPICard } from "@/components/KPICard";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   BarChart, Bar, PieChart, Pie, Cell, LineChart, Line,
   XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -74,52 +75,64 @@ export function DashboardClient({ eventId }: { eventId: string }) {
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
-        <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
-          <h3 className="text-sm font-semibold mb-4 text-gray-600">Donation Funnel</h3>
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={funnelData} barSize={40}>
-              <XAxis dataKey="name" tick={{ fill: "#9ca3af", fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis hide />
-              <Tooltip contentStyle={{ background: "#fff", border: "1px solid #e5e7eb", color: "#111", borderRadius: 8 }} />
-              <Bar dataKey="value" fill="#c8102e" radius={[6,6,0,0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
-          <h3 className="text-sm font-semibold mb-4 text-gray-600">Blood Group Distribution</h3>
-          {bloodGroupDistribution.length > 0 ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm font-semibold text-gray-600">Donation Funnel</CardTitle>
+          </CardHeader>
+          <CardContent>
             <ResponsiveContainer width="100%" height={200}>
-              <PieChart>
-                <Pie data={bloodGroupDistribution} cx="50%" cy="50%" outerRadius={70}
-                  dataKey="value" nameKey="name"
-                  label={({ name, percent }: { name?: string; percent?: number }) => name && percent != null ? `${name} ${(percent*100).toFixed(0)}%` : ""}
-                  labelLine={false} fontSize={10}>
-                  {bloodGroupDistribution.map((_: { name: string; value: number }, i: number) => (
-                    <Cell key={i} fill={BLOOD_GROUP_COLORS[i % BLOOD_GROUP_COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip contentStyle={{ background: "#fff", border: "1px solid #e5e7eb", color: "#111", borderRadius: 8 }} />
-              </PieChart>
-            </ResponsiveContainer>
-          ) : (
-            <p className="text-gray-300 text-sm text-center py-8">No donations recorded yet</p>
-          )}
-        </div>
-
-        {registrationsOverTime.length > 0 && (
-          <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm md:col-span-2">
-            <h3 className="text-sm font-semibold mb-4 text-gray-600">Registrations Over Time</h3>
-            <ResponsiveContainer width="100%" height={160}>
-              <LineChart data={registrationsOverTime}>
-                <XAxis dataKey="time" tick={{ fill: "#d1d5db", fontSize: 9 }} axisLine={false} tickLine={false}
-                  tickFormatter={(v: string) => new Date(v).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })} />
+              <BarChart data={funnelData} barSize={40}>
+                <XAxis dataKey="name" tick={{ fill: "#9ca3af", fontSize: 11 }} axisLine={false} tickLine={false} />
                 <YAxis hide />
                 <Tooltip contentStyle={{ background: "#fff", border: "1px solid #e5e7eb", color: "#111", borderRadius: 8 }} />
-                <Line type="monotone" dataKey="count" stroke="#c8102e" strokeWidth={2} dot={false} />
-              </LineChart>
+                <Bar dataKey="value" fill="#c8102e" radius={[6,6,0,0]} />
+              </BarChart>
             </ResponsiveContainer>
-          </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm font-semibold text-gray-600">Blood Group Distribution</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {bloodGroupDistribution.length > 0 ? (
+              <ResponsiveContainer width="100%" height={200}>
+                <PieChart>
+                  <Pie data={bloodGroupDistribution} cx="50%" cy="50%" outerRadius={70}
+                    dataKey="value" nameKey="name"
+                    label={({ name, percent }: { name?: string; percent?: number }) => name && percent != null ? `${name} ${(percent*100).toFixed(0)}%` : ""}
+                    labelLine={false} fontSize={10}>
+                    {bloodGroupDistribution.map((_: { name: string; value: number }, i: number) => (
+                      <Cell key={i} fill={BLOOD_GROUP_COLORS[i % BLOOD_GROUP_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip contentStyle={{ background: "#fff", border: "1px solid #e5e7eb", color: "#111", borderRadius: 8 }} />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-gray-300 text-sm text-center py-8">No donations recorded yet</p>
+            )}
+          </CardContent>
+        </Card>
+
+        {registrationsOverTime.length > 0 && (
+          <Card className="md:col-span-2">
+            <CardHeader>
+              <CardTitle className="text-sm font-semibold text-gray-600">Registrations Over Time</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={160}>
+                <LineChart data={registrationsOverTime}>
+                  <XAxis dataKey="time" tick={{ fill: "#d1d5db", fontSize: 9 }} axisLine={false} tickLine={false}
+                    tickFormatter={(v: string) => new Date(v).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })} />
+                  <YAxis hide />
+                  <Tooltip contentStyle={{ background: "#fff", border: "1px solid #e5e7eb", color: "#111", borderRadius: 8 }} />
+                  <Line type="monotone" dataKey="count" stroke="#c8102e" strokeWidth={2} dot={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
         )}
       </div>
     </div>

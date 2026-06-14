@@ -6,14 +6,16 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { checkInAction, markDonatedAction, markDeferredAction, markNoShowAction, addDonorToEventAction } from "./actions";
 import { useToast } from "@/components/admin/ToastProvider";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const STATUS_STYLES: Record<string, string> = {
-  registered: "bg-blue-50 text-blue-600 border border-blue-200",
-  confirmed:  "bg-yellow-50 text-yellow-600 border border-yellow-200",
-  checked_in: "bg-orange-50 text-orange-600 border border-orange-200",
-  donated:    "bg-green-50 text-green-600 border border-green-200",
-  deferred:   "bg-red-50 text-red-600 border border-red-200",
-  no_show:    "bg-gray-50 text-gray-500 border border-gray-200",
+  registered: "bg-blue-50 text-blue-600 border-blue-200",
+  confirmed:  "bg-yellow-50 text-yellow-600 border-yellow-200",
+  checked_in: "bg-orange-50 text-orange-600 border-orange-200",
+  donated:    "bg-green-50 text-green-600 border-green-200",
+  deferred:   "bg-red-50 text-red-600 border-red-200",
+  no_show:    "bg-gray-50 text-gray-500 border-gray-200",
 };
 
 const BLOOD_GROUPS = ["A+","A-","B+","B-","AB+","AB-","O+","O-"];
@@ -87,11 +89,15 @@ function AddDonorDialog() {
           </div>
           <div className="space-y-1">
             <Label className="text-gray-700 text-sm">Blood Group</Label>
-            <select name="bloodGroup"
-              className="w-full h-9 px-3 rounded-md border border-gray-200 text-sm text-gray-900 bg-white focus:outline-none">
-              <option value="">Unknown</option>
-              {BLOOD_GROUPS.map(g => <option key={g} value={g}>{g}</option>)}
-            </select>
+            <Select name="bloodGroup" defaultValue="">
+              <SelectTrigger className="w-full h-9">
+                <SelectValue placeholder="Unknown" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Unknown</SelectItem>
+                {BLOOD_GROUPS.map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}
+              </SelectContent>
+            </Select>
           </div>
           {error && <p className="text-red-500 text-sm">{error}</p>}
           <Button type="submit" disabled={isPending} className="w-full bg-[#c8102e] hover:bg-[#a50d27] text-white">
@@ -218,9 +224,9 @@ export function AttendeesClient({ attendees }: { attendees: Attendee[] }) {
                 <td className="px-4 py-3 text-gray-500">{a.donor?.company ?? "—"}</td>
                 <td className="px-4 py-3 text-gray-500">{a.bloodGroupAtEvent ?? a.donor?.bloodGroup ?? "—"}</td>
                 <td className="px-4 py-3">
-                  <span className={`text-xs px-2.5 py-1 rounded-full font-medium capitalize whitespace-nowrap ${STATUS_STYLES[a.status] ?? "bg-gray-50 text-gray-500"}`}>
+                  <Badge variant="outline" className={`capitalize whitespace-nowrap ${STATUS_STYLES[a.status] ?? "bg-gray-50 text-gray-500 border-gray-200"}`}>
                     {a.status.replace("_", " ")}
-                  </span>
+                  </Badge>
                 </td>
                 <td className="px-4 py-3"><ActionButtons a={a} /></td>
               </tr>
@@ -242,9 +248,9 @@ export function AttendeesClient({ attendees }: { attendees: Attendee[] }) {
                 <p className="text-xs text-gray-400">{a.donor?.email}</p>
                 <p className="text-xs text-gray-400">{a.donor?.company ?? ""} · {a.bloodGroupAtEvent ?? a.donor?.bloodGroup ?? "Blood group unknown"}</p>
               </div>
-              <span className={`text-xs px-2.5 py-1 rounded-full font-medium capitalize shrink-0 ${STATUS_STYLES[a.status] ?? "bg-gray-50 text-gray-500"}`}>
+              <Badge variant="outline" className={`capitalize shrink-0 ${STATUS_STYLES[a.status] ?? "bg-gray-50 text-gray-500 border-gray-200"}`}>
                 {a.status.replace("_", " ")}
-              </span>
+              </Badge>
             </div>
             <ActionButtons a={a} />
           </div>

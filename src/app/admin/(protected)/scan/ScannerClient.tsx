@@ -2,6 +2,11 @@
 import { useRef, useState, useTransition } from "react";
 import { BrowserQRCodeReader, IScannerControls } from "@zxing/browser";
 import { checkInAction, markDonatedAction } from "../attendees/actions";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface DonorInfo {
   attendeeId: string;
@@ -202,15 +207,13 @@ export function ScannerClient() {
       {/* Controls */}
       <div className="flex gap-3">
         {!scanning ? (
-          <button onClick={startScanner}
-            className="flex-1 h-11 bg-[#c8102e] hover:bg-[#a50d27] text-white font-medium rounded-xl text-sm transition-colors">
+          <Button onClick={startScanner} className="flex-1 h-11 bg-[#c8102e] hover:bg-[#a50d27] text-white font-medium rounded-xl">
             Start Scanner
-          </button>
+          </Button>
         ) : (
-          <button onClick={stopScanner}
-            className="flex-1 h-11 border border-gray-200 hover:border-gray-300 text-gray-700 font-medium rounded-xl text-sm transition-colors">
+          <Button variant="outline" onClick={stopScanner} className="flex-1 h-11 rounded-xl">
             Stop Scanner
-          </button>
+          </Button>
         )}
       </div>
 
@@ -250,9 +253,9 @@ export function ScannerClient() {
               {(() => {
                 const s = statusLabel[donor.status] ?? { label: donor.status, cls: "bg-gray-100 text-gray-600 border-gray-200" };
                 return (
-                  <span className={`inline-block mt-1 text-xs font-medium px-2 py-0.5 rounded-full border whitespace-nowrap ${s.cls}`}>
+                  <Badge variant="outline" className={`mt-1 whitespace-nowrap ${s.cls}`}>
                     {s.label}
-                  </span>
+                  </Badge>
                 );
               })()}
             </div>
@@ -269,55 +272,58 @@ export function ScannerClient() {
                 <div>
                   <p className="text-xs text-gray-400 mb-0.5">Blood Group</p>
                   {donor.bloodGroup ? (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-red-50 text-[#c8102e] text-xs font-bold border border-red-100">
+                    <Badge variant="outline" className="bg-red-50 text-[#c8102e] border-red-100 font-bold">
                       {donor.bloodGroup}
-                    </span>
+                    </Badge>
                   ) : (
                     <p className="text-gray-400 italic text-sm">Not set</p>
                   )}
                 </div>
               </div>
-              <button onClick={() => setEditMode(true)}
-                className="text-xs text-[#c8102e] hover:underline font-medium">
+              <Button variant="link" size="sm" onClick={() => setEditMode(true)}
+                className="h-auto p-0 text-xs text-[#c8102e] font-medium">
                 Edit details
-              </button>
+              </Button>
             </div>
           ) : (
             <div className="px-5 py-4 space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-gray-600">Full name</label>
-                  <input value={fullName} onChange={e => setFullName(e.target.value)}
-                    className="w-full h-9 px-3 rounded-lg border border-gray-200 text-sm text-gray-900 focus:outline-none focus:border-gray-400" />
+                  <Label className="text-xs font-medium text-gray-600">Full name</Label>
+                  <Input value={fullName} onChange={e => setFullName(e.target.value)}
+                    className="h-9 border-gray-200 text-gray-900" />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-gray-600">Mobile</label>
-                  <input value={mobile} onChange={e => setMobile(e.target.value)} type="tel"
-                    className="w-full h-9 px-3 rounded-lg border border-gray-200 text-sm text-gray-900 focus:outline-none focus:border-gray-400" />
+                  <Label className="text-xs font-medium text-gray-600">Mobile</Label>
+                  <Input type="tel" value={mobile} onChange={e => setMobile(e.target.value)}
+                    className="h-9 border-gray-200 text-gray-900" />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-gray-600">Blood group</label>
-                  <select value={bloodGroup} onChange={e => setBloodGroup(e.target.value)}
-                    className="w-full h-9 px-3 rounded-lg border border-gray-200 text-sm text-gray-900 bg-white focus:outline-none focus:border-gray-400">
-                    <option value="">Unknown</option>
-                    {BLOOD_GROUPS.map(g => <option key={g} value={g}>{g}</option>)}
-                  </select>
+                  <Label className="text-xs font-medium text-gray-600">Blood group</Label>
+                  <Select value={bloodGroup} onValueChange={(v) => setBloodGroup(v ?? "")}>
+                    <SelectTrigger className="w-full h-9">
+                      <SelectValue placeholder="Unknown" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Unknown</SelectItem>
+                      {BLOOD_GROUPS.map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-gray-600">Company</label>
-                  <input value={company} onChange={e => setCompany(e.target.value)}
-                    className="w-full h-9 px-3 rounded-lg border border-gray-200 text-sm text-gray-900 focus:outline-none focus:border-gray-400" />
+                  <Label className="text-xs font-medium text-gray-600">Company</Label>
+                  <Input value={company} onChange={e => setCompany(e.target.value)}
+                    className="h-9 border-gray-200 text-gray-900" />
                 </div>
               </div>
               <div className="flex gap-2 pt-1">
-                <button onClick={handleSaveDetails} disabled={isSaving}
-                  className="flex-1 h-9 flex items-center justify-center gap-2 bg-gray-900 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-60">
+                <Button onClick={handleSaveDetails} disabled={isSaving}
+                  className="flex-1 h-9 bg-gray-900 hover:bg-gray-700 text-white">
                   {isSaving ? <><Spinner /> Saving…</> : "Save"}
-                </button>
-                <button onClick={() => setEditMode(false)}
-                  className="h-9 px-4 border border-gray-200 hover:border-gray-300 text-gray-600 text-sm rounded-lg transition-colors">
+                </Button>
+                <Button variant="outline" onClick={() => setEditMode(false)} className="h-9 px-4">
                   Cancel
-                </button>
+                </Button>
               </div>
             </div>
           )}
@@ -325,16 +331,16 @@ export function ScannerClient() {
           {/* Action buttons */}
           <div className="px-5 pb-5">
             {(donor.status === "registered" || donor.status === "confirmed") && (
-              <button onClick={handleCheckIn} disabled={isProcessing || !bloodGroup}
-                className="w-full h-11 flex items-center justify-center gap-2 bg-[#c8102e] hover:bg-[#a50d27] text-white font-medium rounded-xl text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+              <Button onClick={handleCheckIn} disabled={isProcessing || !bloodGroup}
+                className="w-full h-11 bg-[#c8102e] hover:bg-[#a50d27] text-white font-medium rounded-xl disabled:opacity-50">
                 {isProcessing ? <><Spinner /> Processing…</> : "Check In"}
-              </button>
+              </Button>
             )}
             {donor.status === "checked_in" && (
-              <button onClick={handleMarkDonated} disabled={isProcessing}
-                className="w-full h-11 flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-xl text-sm transition-colors disabled:opacity-50">
+              <Button onClick={handleMarkDonated} disabled={isProcessing}
+                className="w-full h-11 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-xl">
                 {isProcessing ? <><Spinner /> Processing…</> : "Mark as Donated"}
-              </button>
+              </Button>
             )}
             {donor.status === "donated" && (
               <div className="w-full h-11 flex items-center justify-center text-emerald-600 text-sm font-medium">

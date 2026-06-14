@@ -2,6 +2,7 @@
 import { useState, useTransition } from "react";
 import { submitFeedback } from "./actions";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 
@@ -70,8 +71,8 @@ export default function FeedbackPage() {
 
             <div>
               <label className="text-sm font-medium text-[#222222] block mb-1.5">Comments</label>
-              <textarea name="comment" rows={3} placeholder="Any comments? (optional)"
-                className="w-full rounded-lg border border-[#dddddd] bg-white text-[#222222] px-3 py-2.5 text-sm placeholder:text-[#929292] resize-none focus:outline-none focus:border-[#222222]" />
+              <Textarea name="comment" rows={3} placeholder="Any comments? (optional)"
+                className="border-[#dddddd] text-[#222222] placeholder:text-[#929292] resize-none" />
             </div>
 
             <div>

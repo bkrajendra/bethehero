@@ -8,6 +8,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Check } from "lucide-react";
 import Link from "next/link";
 
@@ -220,11 +221,15 @@ function RegisterPageInner() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <Label className="text-sm font-medium text-[#222222]">Blood group</Label>
-                  <select name="bloodGroup"
-                    className="w-full h-12 px-3 rounded-lg border border-[#dddddd] bg-white text-sm text-[#222222] focus:outline-none focus:border-[#222222]">
-                    <option value="">Unknown</option>
-                    {BLOOD_GROUPS.map(g => <option key={g} value={g}>{g}</option>)}
-                  </select>
+                  <Select name="bloodGroup" defaultValue="">
+                    <SelectTrigger className="w-full h-12 border-[#dddddd]">
+                      <SelectValue placeholder="Unknown" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Unknown</SelectItem>
+                      {BLOOD_GROUPS.map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="dob" className="text-sm font-medium text-[#222222]">Date of birth</Label>
