@@ -21,6 +21,7 @@ A blood donation drive management platform built for Confluxsys. Handles donor r
 - **Push notifications** — OneSignal
 - **Deployment** — Vercel
 
+Use this for PWS icon generation: https://www.magicbell.com/tools/pwa-icon-generator
 ---
 
 ## Local Development

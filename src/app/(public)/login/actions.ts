@@ -4,12 +4,13 @@ import { getDonorByEmail, linkDonorToAuthUser } from "@/lib/db/queries/donors";
 
 export async function signInWithProvider(
   provider: "google" | "github",
+  next = "/status",
 ): Promise<{ url?: string; error?: string }> {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback?next=/status`,
+      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback?next=${encodeURIComponent(next)}`,
       skipBrowserRedirect: true,
     },
   });

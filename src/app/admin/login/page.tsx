@@ -1,5 +1,6 @@
 "use client";
 import { useState, useTransition } from "react";
+import Image from "next/image";
 import { sendAdminOtp, verifyAdminOtp } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,8 +35,8 @@ export default function AdminLoginPage() {
     <main className="min-h-screen flex items-center justify-center p-6 bg-gray-50">
       <div className="max-w-sm w-full">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#c8102e] text-white text-2xl mb-4 shadow-lg shadow-red-100">
-            🩸
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#c8102e] mb-4 shadow-lg shadow-red-100">
+            <Image src="/logo.png" alt="BeTheHero" width={36} height={36} className="object-contain brightness-0 invert" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900">Admin Login</h1>
           <p className="mt-1 text-sm text-gray-400">BeTheHero Admin Panel</p>

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRouter, useSearchParams } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
 
 function Spinner() {
@@ -62,9 +63,7 @@ function LoginPageInner() {
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 mb-6">
-            <svg width="24" height="30" viewBox="0 0 54 66" fill="none">
-              <path d="M27 2C27 2 3 26 3 43C3 56.25 13.75 67 27 67C40.25 67 51 56.25 51 43C51 26 27 2 27 2Z" fill="#c8102e" />
-            </svg>
+            <Image src="/logo.png" alt="BeTheHero" width={28} height={28} className="object-contain" />
             <span className="font-semibold text-[#222222]">BeTheHero</span>
           </Link>
           <h1 className="text-2xl font-bold text-[#222222]">Welcome back</h1>

@@ -20,18 +20,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Badge is for a different event" }, { status: 400 });
     }
 
-    const digitsOnly = attendee.donor.mobile.replace(/\D/g, "");
-    const maskedMobile = digitsOnly.length >= 10
-      ? digitsOnly.replace(/(\d{3})\d{4}(\d{3})/, "$1****$2")
-      : "****";
-
     return NextResponse.json({
       attendeeId:  attendee.id,
       donorId:     attendee.donorId,
       status:      attendee.status,
       fullName:    attendee.donor.fullName,
       company:     attendee.donor.company,
-      mobile:      maskedMobile,
+      mobile:      attendee.donor.mobile,
       bloodGroup:  attendee.bloodGroupAtEvent ?? attendee.donor.bloodGroup,
     });
   } catch (e) {

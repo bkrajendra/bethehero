@@ -1,6 +1,7 @@
 import { getAttendeeByBadgeToken } from "@/lib/db/queries/attendees";
 import { generateQRDataURL } from "@/lib/qr/generate";
 import Link from "next/link";
+import Image from "next/image";
 import type { Metadata } from "next";
 
 interface Props {
@@ -55,9 +56,7 @@ export default async function BadgePage({ params }: Props) {
           {/* Red header strip */}
           <div className="bg-[#c8102e] px-6 pt-5 pb-4 text-white">
             <div className="flex items-center gap-2 mb-3">
-              <svg width="20" height="24" viewBox="0 0 54 66" fill="none">
-                <path d="M27 2C27 2 3 26 3 43C3 56.25 13.75 67 27 67C40.25 67 51 56.25 51 43C51 26 27 2 27 2Z" fill="white" />
-              </svg>
+              <Image src="/logo.png" alt="BeTheHero" width={22} height={22} className="object-contain brightness-0 invert" />
               <span className="text-sm font-semibold opacity-90">BeTheHero</span>
             </div>
             <h1 className="text-xl font-bold leading-tight">{donor.fullName}</h1>

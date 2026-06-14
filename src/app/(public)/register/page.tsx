@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { registerDonor, type RegisterResult } from "./actions";
 import { signInWithProvider } from "../login/actions";
 import { ConfirmationScreen } from "./ConfirmationScreen";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -47,6 +48,7 @@ function StepIndicator({ step }: { step: 1 | 2 }) {
 
 function RegisterPageInner() {
   const params = useSearchParams();
+  const fromOAuth = !!(params.get("email") && params.get("name"));
   const [step, setStep] = useState<1 | 2>(1);
   const [step1, setStep1] = useState({
     email: params.get("email") ?? "",
@@ -123,9 +125,7 @@ function RegisterPageInner() {
 
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 mb-6">
-            <svg width="24" height="30" viewBox="0 0 54 66" fill="none">
-              <path d="M27 2C27 2 3 26 3 43C3 56.25 13.75 67 27 67C40.25 67 51 56.25 51 43C51 26 27 2 27 2Z" fill="#c8102e" />
-            </svg>
+            <Image src="/logo.png" alt="BeTheHero" width={28} height={28} className="object-contain" />
             <span className="font-semibold text-[#222222]">BeTheHero</span>
           </Link>
           {step === 1 ? (
@@ -150,38 +150,42 @@ function RegisterPageInner() {
             <div className="space-y-4">
               {error && <p className="text-[#c13515] text-sm text-center">{error}</p>}
 
-              {/* OAuth buttons */}
-              <div className="space-y-2.5">
-                <button onClick={() => handleOAuth("google")} disabled={isPending || oauthPending !== null}
-                  className="w-full h-11 flex items-center justify-center gap-3 border border-[#dddddd] rounded-lg text-sm font-medium text-[#222222] hover:bg-[#f7f7f7] transition-colors disabled:opacity-60 disabled:cursor-not-allowed">
-                  {oauthPending === "google" ? <Spinner /> : (
-                    <svg width="18" height="18" viewBox="0 0 18 18">
-                      <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/>
-                      <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
-                      <path fill="#FBBC05" d="M3.964 10.707A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z"/>
-                      <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.961L3.964 6.293C4.672 4.166 6.656 3.58 9 3.58z"/>
-                    </svg>
-                  )}
-                  {oauthPending === "google" ? "Redirecting…" : "Sign up with Google"}
-                </button>
+              {!fromOAuth && (
+                <>
+                  {/* OAuth buttons */}
+                  <div className="space-y-2.5">
+                    <button onClick={() => handleOAuth("google")} disabled={isPending || oauthPending !== null}
+                      className="w-full h-11 flex items-center justify-center gap-3 border border-[#dddddd] rounded-lg text-sm font-medium text-[#222222] hover:bg-[#f7f7f7] transition-colors disabled:opacity-60 disabled:cursor-not-allowed">
+                      {oauthPending === "google" ? <Spinner /> : (
+                        <svg width="18" height="18" viewBox="0 0 18 18">
+                          <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/>
+                          <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
+                          <path fill="#FBBC05" d="M3.964 10.707A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z"/>
+                          <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.961L3.964 6.293C4.672 4.166 6.656 3.58 9 3.58z"/>
+                        </svg>
+                      )}
+                      {oauthPending === "google" ? "Redirecting…" : "Sign up with Google"}
+                    </button>
 
-                <button onClick={() => handleOAuth("github")} disabled={isPending || oauthPending !== null}
-                  className="w-full h-11 flex items-center justify-center gap-3 border border-[#dddddd] rounded-lg text-sm font-medium text-[#222222] hover:bg-[#f7f7f7] transition-colors disabled:opacity-60 disabled:cursor-not-allowed">
-                  {oauthPending === "github" ? <Spinner /> : (
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 0C5.37 0 0 5.37 0 12c0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.385-1.335-1.755-1.335-1.755-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.298 24 12c0-6.63-5.37-12-12-12z"/>
-                    </svg>
-                  )}
-                  {oauthPending === "github" ? "Redirecting…" : "Sign up with GitHub"}
-                </button>
-              </div>
+                    <button onClick={() => handleOAuth("github")} disabled={isPending || oauthPending !== null}
+                      className="w-full h-11 flex items-center justify-center gap-3 border border-[#dddddd] rounded-lg text-sm font-medium text-[#222222] hover:bg-[#f7f7f7] transition-colors disabled:opacity-60 disabled:cursor-not-allowed">
+                      {oauthPending === "github" ? <Spinner /> : (
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 0C5.37 0 0 5.37 0 12c0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.385-1.335-1.755-1.335-1.755-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.298 24 12c0-6.63-5.37-12-12-12z"/>
+                        </svg>
+                      )}
+                      {oauthPending === "github" ? "Redirecting…" : "Sign up with GitHub"}
+                    </button>
+                  </div>
 
-              {/* Divider */}
-              <div className="flex items-center gap-3">
-                <div className="flex-1 h-px bg-[#ebebeb]" />
-                <span className="text-xs text-[#929292]">or continue with email</span>
-                <div className="flex-1 h-px bg-[#ebebeb]" />
-              </div>
+                  {/* Divider */}
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1 h-px bg-[#ebebeb]" />
+                    <span className="text-xs text-[#929292]">or continue with email</span>
+                    <div className="flex-1 h-px bg-[#ebebeb]" />
+                  </div>
+                </>
+              )}
 
               <form onSubmit={handleStep1} className="space-y-4">
                 <div className="space-y-1.5">
@@ -192,11 +196,12 @@ function RegisterPageInner() {
                 <div className="space-y-1.5">
                   <Label htmlFor="email" className="text-sm font-medium text-[#222222]">Email address *</Label>
                   <Input id="email" name="email" type="email" required defaultValue={step1.email}
-                    placeholder="you@example.com" className={INPUT_CLS} />
+                    placeholder="you@example.com" readOnly={fromOAuth}
+                    className={`${INPUT_CLS} ${fromOAuth ? "bg-[#f7f7f7] text-[#929292] cursor-not-allowed select-none" : ""}`} />
                 </div>
                 <Button type="submit" disabled={isPending || oauthPending !== null}
                   className="w-full h-12 bg-[#c8102e] hover:bg-[#a50d27] text-white font-medium rounded-lg">
-                  Next →
+                  {fromOAuth ? "Continue →" : "Next →"}
                 </Button>
               </form>
             </div>

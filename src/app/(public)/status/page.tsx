@@ -1,10 +1,42 @@
 "use client";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { StatusTimeline } from "@/components/StatusTimeline";
 import { DonationCelebration } from "@/components/DonationCelebration";
 import { PushSubscribeCard } from "@/components/PushSubscribeCard";
-import { UserRound } from "lucide-react";
+import { UserRound, X, Maximize2 } from "lucide-react";
 import Link from "next/link";
+
+function QRThumbnail({ qrDataUrl }: { qrDataUrl: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button onClick={() => setOpen(true)}
+        className="shrink-0 relative group rounded-lg border border-[#ebebeb] overflow-hidden focus:outline-none">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={qrDataUrl} alt="Badge QR code" width={100} height={100} className="block" />
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+          <Maximize2 size={18} className="text-[#222222] opacity-0 group-hover:opacity-70 transition-opacity" />
+        </div>
+      </button>
+      {open && (
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-6"
+          onClick={() => setOpen(false)}>
+          <div className="relative bg-white rounded-2xl p-6 flex flex-col items-center gap-4 max-w-xs w-full"
+            onClick={e => e.stopPropagation()}>
+            <button onClick={() => setOpen(false)}
+              className="absolute top-3 right-3 text-[#929292] hover:text-[#222222] transition-colors">
+              <X size={20} />
+            </button>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={qrDataUrl} alt="Badge QR code" width={260} height={260} className="rounded-lg" />
+            <p className="text-xs text-[#929292] text-center">Show this QR at the event entrance</p>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
 
 async function fetchStatus() {
   const res = await fetch("/api/donor/status");
@@ -90,15 +122,12 @@ export default function StatusPage() {
             </div>
 
             {qrDataUrl && (
-              <div className="shrink-0 flex flex-col items-center gap-1.5">
-                <img src={qrDataUrl} alt="Badge QR code" width={100} height={100}
-                  className="rounded-lg border border-[#ebebeb]" />
-              </div>
+              <QRThumbnail qrDataUrl={qrDataUrl} />
             )}
           </div>
 
           <p className="text-center text-[10px] text-[#929292] pb-3">
-            Show this at the event entrance
+            Tap QR to expand · Show at event entrance
           </p>
         </div>
 

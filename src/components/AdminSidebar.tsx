@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
@@ -74,7 +75,7 @@ export function AdminSidebar({ admin, events, currentEventId }: Props) {
       {/* Mobile top bar */}
       <div className="md:hidden fixed top-0 left-0 right-0 z-30 bg-white border-b border-gray-100 px-4 h-14 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-[#c8102e] font-bold text-lg">🩸</span>
+          <Image src="/logo.png" alt="BeTheHero" width={26} height={26} className="object-contain" />
           <span className="font-bold text-gray-900 text-sm">BeTheHero Admin</span>
         </div>
         <button onClick={() => setOpen(!open)} className="p-2 rounded-lg hover:bg-gray-100 text-gray-600">
@@ -97,7 +98,7 @@ export function AdminSidebar({ admin, events, currentEventId }: Props) {
       <aside className="hidden md:flex w-60 flex-col border-r border-gray-100 bg-white shrink-0">
         <div className="p-4 border-b border-gray-100">
           <div className="flex items-center gap-2 mb-4">
-            <span className="text-[#c8102e] font-bold text-xl">🩸</span>
+            <Image src="/logo.png" alt="BeTheHero" width={28} height={28} className="object-contain" />
             <span className="font-bold text-gray-900">BeTheHero</span>
           </div>
           <div className="flex items-center gap-3">

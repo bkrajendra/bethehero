@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { getActiveEvent } from "@/lib/db/queries/events";
 
 export default async function Home() {
@@ -26,16 +27,7 @@ export default async function Home() {
       {/* Nav */}
       <nav className="border-b border-[#dddddd] px-6 py-4 flex items-center justify-between max-w-5xl mx-auto">
         <div className="flex items-center gap-2">
-          <svg width="28" height="34" viewBox="0 0 54 66" fill="none">
-            <path d="M27 2C27 2 3 26 3 43C3 56.25 13.75 67 27 67C40.25 67 51 56.25 51 43C51 26 27 2 27 2Z"
-              fill="url(#hg)" />
-            <defs>
-              <linearGradient id="hg" x1="27" y1="2" x2="27" y2="67" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor="#e8384f" />
-                <stop offset="100%" stopColor="#a50d27" />
-              </linearGradient>
-            </defs>
-          </svg>
+          <Image src="/logo.png" alt="BeTheHero" width={32} height={32} className="object-contain" />
           <span className="font-semibold text-[#222222] text-lg tracking-tight">BeTheHero</span>
         </div>
         <div className="flex items-center gap-4">
@@ -163,9 +155,7 @@ export default async function Home() {
       <footer className="border-t border-[#ebebeb] bg-white">
         <div className="max-w-5xl mx-auto px-6 py-8 flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-2">
-            <svg width="20" height="24" viewBox="0 0 54 66" fill="none">
-              <path d="M27 2C27 2 3 26 3 43C3 56.25 13.75 67 27 67C40.25 67 51 56.25 51 43C51 26 27 2 27 2Z" fill="#c8102e" />
-            </svg>
+            <Image src="/logo.png" alt="BeTheHero" width={24} height={24} className="object-contain" />
             <span className="text-sm font-medium text-[#222222]">BeTheHero</span>
           </div>
           <p className="text-xs text-[#929292] text-center">
