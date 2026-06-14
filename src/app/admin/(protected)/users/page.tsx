@@ -21,6 +21,7 @@ interface DonorEntry {
   fullName: string;
   email: string;
   mobile: string;
+  gender: string | null;
   company: string | null;
   bloodGroup: string | null;
   dob: string | null;
@@ -64,6 +65,7 @@ function EditDonorDialog({ donor, onClose }: { donor: DonorEntry | null; onClose
   const [form, setForm] = useState({
     fullName: donor?.fullName ?? "",
     mobile: donor?.mobile ?? "",
+    gender: donor?.gender ?? "",
     company: donor?.company ?? "",
     bloodGroup: donor?.bloodGroup ?? "",
     dob: donor?.dob ?? "",
@@ -93,6 +95,20 @@ function EditDonorDialog({ donor, onClose }: { donor: DonorEntry | null; onClose
                     className="border-[#dddddd] text-[#222222]" />
                 </div>
               ))}
+              <div>
+                <Label className="text-xs font-medium text-[#6a6a6a] block mb-1">Gender</Label>
+                <Select value={form.gender} onValueChange={(v) => setForm(f => ({ ...f, gender: v ?? "" }))}>
+                  <SelectTrigger className="w-full h-10">
+                    <SelectValue placeholder="Prefer not to say" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Prefer not to say</SelectItem>
+                    <SelectItem value="male">Male</SelectItem>
+                    <SelectItem value="female">Female</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               <div>
                 <Label className="text-xs font-medium text-[#6a6a6a] block mb-1">Blood Group</Label>
                 <Select value={form.bloodGroup} onValueChange={(v) => setForm(f => ({ ...f, bloodGroup: v ?? "" }))}>
@@ -253,7 +269,15 @@ export default function UsersPage() {
 
       {isLoading ? (
         <div className="space-y-3">
-          {Array.from({ length: 5 }).map((_, i) => <div key={i} className="h-20 rounded-xl bg-[#f7f7f7] animate-pulse" />)}
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="h-20 rounded-xl bg-gray-100 animate-pulse border border-gray-100">
+              <div className="p-4 space-y-2">
+                <div className="h-3.5 w-40 bg-gray-200 rounded animate-pulse" />
+                <div className="h-3 w-56 bg-gray-200 rounded animate-pulse" />
+                <div className="h-3 w-24 bg-gray-200 rounded animate-pulse" />
+              </div>
+            </div>
+          ))}
         </div>
       ) : filtered.length === 0 ? (
         <p className="text-center py-10 text-[#c4c4c4]">No donors found</p>

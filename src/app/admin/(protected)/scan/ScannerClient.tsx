@@ -42,6 +42,7 @@ export function ScannerClient() {
   const [bloodGroup, setBloodGroup] = useState("");
   const [fullName, setFullName] = useState("");
   const [mobile, setMobile] = useState("");
+  const [gender, setGender] = useState("");
   const [company, setCompany] = useState("");
   const [editMode, setEditMode] = useState(false);
 
@@ -96,6 +97,7 @@ export function ScannerClient() {
           setBloodGroup(data.bloodGroup ?? "");
           setFullName(data.fullName ?? "");
           setMobile(data.mobile ?? "");
+          setGender(data.gender ?? "");
           setCompany(data.company ?? "");
         }
       });
@@ -126,6 +128,7 @@ export function ScannerClient() {
           data: {
             fullName: fullName.trim(),
             mobile: mobile.trim(),
+            gender: gender || null,
             company: company.trim() || null,
             bloodGroup: bloodGroup || null,
           },
@@ -307,6 +310,20 @@ export function ScannerClient() {
                     <SelectContent>
                       <SelectItem value="">Unknown</SelectItem>
                       {BLOOD_GROUPS.map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs font-medium text-gray-600">Gender</Label>
+                  <Select value={gender} onValueChange={(v) => setGender(v ?? "")}>
+                    <SelectTrigger className="w-full h-9">
+                      <SelectValue placeholder="Not specified" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Not specified</SelectItem>
+                      <SelectItem value="male">Male</SelectItem>
+                      <SelectItem value="female">Female</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

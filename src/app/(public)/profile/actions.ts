@@ -6,6 +6,7 @@ import { updateDonorProfile } from "@/lib/db/queries/donors";
 const ProfileSchema = z.object({
   fullName:   z.string().min(2).max(100),
   mobile:     z.string().min(10).max(15).optional(),
+  gender:     z.enum(["male", "female", "other"]).optional(),
   company:    z.string().max(100).optional(),
   dob:        z.string().optional(),
   bloodGroup: z.enum(["A+","A-","B+","B-","AB+","AB-","O+","O-"]).optional(),
@@ -22,6 +23,7 @@ export async function updateProfile(formData: FormData): Promise<ProfileResult> 
     const raw = {
       fullName:   formData.get("fullName"),
       mobile:     formData.get("mobile") || undefined,
+      gender:     formData.get("gender") || undefined,
       company:    formData.get("company") || undefined,
       dob:        formData.get("dob") || undefined,
       bloodGroup: formData.get("bloodGroup") || undefined,
@@ -36,9 +38,10 @@ export async function updateProfile(formData: FormData): Promise<ProfileResult> 
     await updateDonorProfile(donorId, {
       fullName:   d.fullName,
       mobile:     d.mobile ?? "",
-      company:    d.company ?? null,
-      dob:        d.dob ?? null,
-      bloodGroup: (d.bloodGroup ?? null) as ("A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-") | null,
+      gender:     (d.gender || null) as "male" | "female" | "other" | null,
+      company:    d.company || null,
+      dob:        d.dob || null,
+      bloodGroup: (d.bloodGroup || null) as ("A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-") | null,
     });
 
     return { type: "success" };

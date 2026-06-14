@@ -49,7 +49,7 @@ export async function linkDonorToAuthUser(donorId: string, authUserId: string) {
 
 export async function updateDonorProfile(
   donorId: string,
-  data: Pick<Donor, "fullName" | "mobile" | "company" | "bloodGroup" | "dob">,
+  data: Pick<Donor, "fullName" | "mobile" | "gender" | "company" | "bloodGroup" | "dob">,
 ) {
   const [updated] = await db
     .update(donors)

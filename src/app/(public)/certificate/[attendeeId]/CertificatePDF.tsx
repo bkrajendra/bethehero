@@ -1,29 +1,48 @@
 "use client";
 import {
-  Document, Page, Text, View, StyleSheet, PDFDownloadLink,
+  Document, Page, Text, View, Image, StyleSheet, PDFDownloadLink,
 } from "@react-pdf/renderer";
 
-const styles = StyleSheet.create({
-  page:      { fontFamily: "Helvetica", backgroundColor: "#fff", padding: 48, gap: 16 },
-  header:    { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  title:     { fontSize: 22, fontWeight: "bold", color: "#c8102e", textAlign: "center", marginVertical: 12 },
-  subtitle:  { fontSize: 12, color: "#555", textAlign: "center" },
-  divider:   { borderBottom: "1 solid #e0c8c8", marginVertical: 12 },
-  label:     { fontSize: 9, color: "#888", textTransform: "uppercase", letterSpacing: 1 },
-  value:     { fontSize: 14, color: "#111", marginTop: 2, marginBottom: 10 },
-  footer:    { flexDirection: "row", justifyContent: "space-around", marginTop: 24 },
-  signatory: { alignItems: "center" },
-  sigLine:   { borderTop: "1 solid #aaa", width: 120, marginBottom: 4 },
-  sigName:   { fontSize: 10, fontWeight: "bold" },
-  sigTitle:  { fontSize: 9, color: "#666" },
+// A4 landscape in PDF points (width × height)
+const W = 841.89;
+const H = 595.28;
+
+const s = StyleSheet.create({
+  page:    { padding: 0 },
+  canvas:  { position: "relative", width: W, height: H },
+  bg:      { position: "absolute", top: 0, left: 0, width: W, height: H },
 });
+
+// Absolutely positioned text block inside the canvas View
+function Abs({
+  top, left = 0, width = W, align = "center", size, bold, color, spacing, children,
+}: {
+  top: number; left?: number; width?: number;
+  align?: "left" | "center" | "right";
+  size: number; bold?: boolean; color?: string; spacing?: number;
+  children: React.ReactNode;
+}) {
+  return (
+    <View style={{ position: "absolute", top, left, width }}>
+      <Text style={{
+        fontSize: size,
+        fontFamily: bold ? "Helvetica-Bold" : "Helvetica",
+        color: color ?? "#222222",
+        textAlign: align,
+        ...(spacing ? { letterSpacing: spacing } : {}),
+      }}>
+        {children}
+      </Text>
+    </View>
+  );
+}
 
 interface CertData {
   attendee: {
-    certificateNumber: string;
-    bloodGroupAtEvent: string;
-    donatedAt: string;
-    donor: { fullName: string; company: string };
+    certificateNumber: string | null;
+    bloodGroupAtEvent: string | null;
+    donatedAt: string | null;
+    donor: { fullName: string; company: string | null };
     event: {
       name: string; venue: string; startAt: string;
       organiserName: string; bloodBankName: string;
@@ -31,54 +50,94 @@ interface CertData {
       bloodBankSignatoryName: string; bloodBankSignatoryTitle: string;
     };
   };
+  bgUrl: string;
 }
 
 function CertDocument({ data }: { data: CertData }) {
-  const { attendee } = data;
+  const { attendee, bgUrl } = data;
+  const eventDate = new Date(attendee.event.startAt).toLocaleDateString("en-IN", {
+    day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Kolkata",
+  });
+
   return (
     <Document>
-      <Page size="A4" style={styles.page}>
-        <View style={styles.divider} />
-        <Text style={styles.title}>Certificate of Blood Donation</Text>
-        <Text style={styles.subtitle}>This certifies that the following individual has donated blood</Text>
-        <View style={styles.divider} />
-        <Text style={styles.label}>Donor Name</Text>
-        <Text style={styles.value}>{attendee.donor.fullName}</Text>
-        <Text style={styles.label}>Company</Text>
-        <Text style={styles.value}>{attendee.donor.company || "—"}</Text>
-        <Text style={styles.label}>Blood Group</Text>
-        <Text style={styles.value}>{attendee.bloodGroupAtEvent}</Text>
-        <Text style={styles.label}>Event</Text>
-        <Text style={styles.value}>{attendee.event.name}</Text>
-        <Text style={styles.label}>Venue</Text>
-        <Text style={styles.value}>{attendee.event.venue}</Text>
-        <Text style={styles.label}>Date</Text>
-        <Text style={styles.value}>{new Date(attendee.event.startAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Kolkata" })}</Text>
-        <Text style={styles.label}>Certificate No.</Text>
-        <Text style={styles.value}>{attendee.certificateNumber}</Text>
-        <View style={styles.divider} />
-        <View style={styles.footer}>
-          <View style={styles.signatory}>
-            <View style={styles.sigLine} />
-            <Text style={styles.sigName}>{attendee.event.organiserSignatoryName}</Text>
-            <Text style={styles.sigTitle}>{attendee.event.organiserSignatoryTitle}</Text>
-          </View>
-          <View style={styles.signatory}>
-            <View style={styles.sigLine} />
-            <Text style={styles.sigName}>{attendee.event.bloodBankSignatoryName}</Text>
-            <Text style={styles.sigTitle}>{attendee.event.bloodBankSignatoryTitle}</Text>
-          </View>
+      <Page size={[W, H]} style={s.page}>
+        {/* Single root View — all absolute children are positioned relative to this */}
+        <View style={s.canvas}>
+          {/* Layer 0: background */}
+          <Image src={bgUrl} style={s.bg} />
+
+          {/* Layer 1: title */}
+          <Abs top={158} size={21} bold color="#7B1B1B" spacing={1.5}>
+            Certificate of Blood Donation
+          </Abs>
+
+          {/* Layer 2: subtitle */}
+          <Abs top={188} size={9} color="#888" spacing={0.3}>
+            This certifies that the following individual has generously donated blood
+          </Abs>
+
+          {/* Layer 3: event name & date */}
+          <Abs top={216} left={60} width={W - 120} size={14} bold color="#222">
+            {attendee.event.name}
+          </Abs>
+          <Abs top={240} size={10} color="#666">
+            {eventDate}
+          </Abs>
+
+          {/* Layer 4: donor name — focal element */}
+          <Abs top={278} left={60} width={W - 120} size={30} bold color="#c8102e">
+            {attendee.donor.fullName}
+          </Abs>
+
+          {/* Layer 5: blood group */}
+          {attendee.bloodGroupAtEvent ? (
+            <Abs top={326} size={12} color="#8B1A1A">
+              Blood Group: {attendee.bloodGroupAtEvent}
+            </Abs>
+          ) : null}
+
+          {/* Layer 6: company */}
+          {attendee.donor.company ? (
+            <Abs top={352} left={60} width={W - 120} size={11} color="#444">
+              {attendee.donor.company}
+            </Abs>
+          ) : null}
+
+          {/* Layer 7: certificate number */}
+          {attendee.certificateNumber ? (
+            <Abs top={382} size={8} color="#aaa" spacing={0.5}>
+              Certificate No. {attendee.certificateNumber}
+            </Abs>
+          ) : null}
+
+          {/* Layer 8: signatures — inside the white box at bottom of the background */}
+          <Abs top={485} left={80} width={200} size={9} bold color="#222">
+            {attendee.event.organiserSignatoryName}
+          </Abs>
+          <Abs top={498} left={80} width={200} size={8} color="#666">
+            {attendee.event.organiserSignatoryTitle}
+          </Abs>
+
+          <Abs top={485} left={560} width={200} size={9} bold color="#222">
+            {attendee.event.bloodBankSignatoryName}
+          </Abs>
+          <Abs top={498} left={560} width={200} size={8} color="#666">
+            {attendee.event.bloodBankSignatoryTitle}
+          </Abs>
         </View>
       </Page>
     </Document>
   );
 }
 
-export function CertificateDownloadButton({ data }: { data: CertData }) {
+export function CertificateDownloadButton({ data, bgUrl }: { data: Omit<CertData, "bgUrl">; bgUrl: string }) {
+  const name = data.attendee.donor.fullName.replace(/\s+/g, "-");
+  const fileName = `certificate-${data.attendee.certificateNumber ?? name}.pdf`;
   return (
     <PDFDownloadLink
-      document={<CertDocument data={data} />}
-      fileName={`certificate-${data.attendee.certificateNumber}.pdf`}
+      document={<CertDocument data={{ ...data, bgUrl }} />}
+      fileName={fileName}
     >
       {({ loading }) => (
         <button

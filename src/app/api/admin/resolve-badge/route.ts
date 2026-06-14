@@ -25,6 +25,7 @@ export async function POST(req: NextRequest) {
       donorId:     attendee.donorId,
       status:      attendee.status,
       fullName:    attendee.donor.fullName,
+      gender:      attendee.donor.gender,
       company:     attendee.donor.company,
       mobile:      attendee.donor.mobile,
       bloodGroup:  attendee.bloodGroupAtEvent ?? attendee.donor.bloodGroup,

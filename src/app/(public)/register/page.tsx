@@ -218,6 +218,20 @@ function RegisterPageInner() {
                 <Label htmlFor="company" className="text-sm font-medium text-[#222222]">Company</Label>
                 <Input id="company" name="company" placeholder="Your company (optional)" className={INPUT_CLS} />
               </div>
+              <div className="space-y-1.5">
+                <Label className="text-sm font-medium text-[#222222]">Gender</Label>
+                <Select name="gender" defaultValue="">
+                  <SelectTrigger className="w-full h-12 border-[#dddddd]">
+                    <SelectValue placeholder="Select gender" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Prefer not to say</SelectItem>
+                    <SelectItem value="male">Male</SelectItem>
+                    <SelectItem value="female">Female</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <Label className="text-sm font-medium text-[#222222]">Blood group</Label>

@@ -17,6 +17,7 @@ export const notificationTypeEnum = pgEnum("notification_type", [
 ]);
 export const notificationChannelEnum = pgEnum("notification_channel", ["email", "push"]);
 export const adminRoleEnum = pgEnum("admin_role", ["super", "scanner"]);
+export const genderEnum = pgEnum("gender", ["male", "female", "other"]);
 export const notificationStatusEnum = pgEnum("notification_status", [
   "pending", "sent", "failed", "skipped",
 ]);
@@ -29,6 +30,7 @@ export const donors = pgTable("donors", {
   emailVerified:  boolean("email_verified").notNull().default(false),
   mobile:         text("mobile").notNull(),
   fullName:       text("full_name").notNull(),
+  gender:         genderEnum("gender"),
   bloodGroup:     bloodGroupEnum("blood_group"),
   dob:            date("dob"),
   company:        text("company"),

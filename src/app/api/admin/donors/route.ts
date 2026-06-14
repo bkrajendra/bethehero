@@ -73,6 +73,7 @@ export async function PATCH(req: NextRequest) {
       const schema = z.object({
         fullName: z.string().min(2),
         mobile: z.string().min(6),
+        gender: z.enum(["male", "female", "other"]).optional().nullable(),
         company: z.string().optional().nullable(),
         bloodGroup: z.enum(VALID_GROUPS).optional().nullable(),
         dob: z.string().optional().nullable(),
@@ -81,9 +82,10 @@ export async function PATCH(req: NextRequest) {
       const updated = await updateDonorProfile(donorId, {
         fullName: parsed.fullName,
         mobile: parsed.mobile,
-        company: parsed.company ?? null,
-        bloodGroup: (parsed.bloodGroup as typeof VALID_GROUPS[number]) ?? null,
-        dob: parsed.dob ?? null,
+        gender: (parsed.gender || null) as "male" | "female" | "other" | null,
+        company: parsed.company || null,
+        bloodGroup: (parsed.bloodGroup as typeof VALID_GROUPS[number] | undefined) || null,
+        dob: parsed.dob || null,
       });
       return NextResponse.json({ donor: updated });
     }

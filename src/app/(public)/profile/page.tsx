@@ -7,8 +7,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Check } from "lucide-react";
 import Link from "next/link";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const BLOOD_GROUPS = ["A+","A-","B+","B-","AB+","AB-","O+","O-"] as const;
+const GENDERS = [
+  { value: "male",   label: "Male" },
+  { value: "female", label: "Female" },
+  { value: "other",  label: "Other" },
+] as const;
 const INPUT_CLS = "border-[#dddddd] text-[#222222] placeholder:text-[#929292] h-12 focus:border-[#222222] focus:ring-0 focus-visible:ring-0 focus-visible:border-[#222222]";
 
 async function fetchProfile() {
@@ -18,6 +24,7 @@ async function fetchProfile() {
     fullName: string;
     email: string;
     mobile: string;
+    gender: string | null;
     company: string | null;
     dob: string | null;
     bloodGroup: string | null;
@@ -111,6 +118,19 @@ export default function ProfilePage() {
               <Label htmlFor="company" className="text-sm font-medium text-[#222222]">Company</Label>
               <Input id="company" name="company" defaultValue={data.company ?? ""}
                 placeholder="Your company (optional)" className={INPUT_CLS} />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium text-[#222222]">Gender</Label>
+              <Select name="gender" defaultValue={data.gender ?? ""}>
+                <SelectTrigger className={INPUT_CLS}>
+                  <SelectValue placeholder="Prefer not to say" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Prefer not to say</SelectItem>
+                  {GENDERS.map(g => <SelectItem key={g.value} value={g.value}>{g.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="grid grid-cols-2 gap-4">

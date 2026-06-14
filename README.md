@@ -22,6 +22,7 @@ A blood donation drive management platform built for Confluxsys. Handles donor r
 - **Deployment** — Vercel
 
 PWA icon generation: https://www.magicbell.com/tools/pwa-icon-generator
+Music from: https://pixabay.com/music/
 ---
 
 ## Local Development

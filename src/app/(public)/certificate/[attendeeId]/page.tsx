@@ -43,7 +43,7 @@ export default function CertificatePage() {
             <h1 className="text-xl font-bold text-[#222222]">Your Certificate</h1>
             <p className="text-xs text-[#929292] mt-1 font-mono">#{data.attendee.certificateNumber}</p>
           </div>
-          <CertificateDownloadButton data={data} />
+          <CertificateDownloadButton data={data} bgUrl={`${window.location.origin}/certbg.png`} />
           <Link href="/status" className="block text-sm text-[#6a6a6a] hover:text-[#222222] transition-colors">
             ← Back to status
           </Link>

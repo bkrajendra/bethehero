@@ -8,6 +8,7 @@ export async function GET() {
       fullName:   donor.fullName,
       email:      donor.email,
       mobile:     donor.mobile,
+      gender:     donor.gender,
       company:    donor.company,
       dob:        donor.dob,
       bloodGroup: donor.bloodGroup,
