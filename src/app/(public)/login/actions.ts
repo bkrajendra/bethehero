@@ -45,3 +45,17 @@ export async function verifyOtp(email: string, token: string): Promise<{ error?:
   }
   return {};
 }
+
+export async function signOut(): Promise<void> {
+  const supabase = await createSupabaseServerClient();
+  await supabase.auth.signOut();
+  const { redirect } = await import("next/navigation");
+  redirect("/login");
+}
+
+export async function signOutAdmin(): Promise<void> {
+  const supabase = await createSupabaseServerClient();
+  await supabase.auth.signOut();
+  const { redirect } = await import("next/navigation");
+  redirect("/admin/login");
+}

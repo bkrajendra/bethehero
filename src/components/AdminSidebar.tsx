@@ -3,7 +3,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { LayoutDashboard, CalendarDays, ScanLine, Droplets, Users, FileBarChart } from "lucide-react";
+import { LayoutDashboard, CalendarDays, ScanLine, Droplets, Users, FileBarChart, LogOut } from "lucide-react";
+import { signOutAdmin } from "@/app/(public)/login/actions";
 
 interface Event { id: string; name: string; status: string }
 interface Admin { name: string; role: string }
@@ -63,10 +64,15 @@ export function AdminSidebar({ admin, events, currentEventId }: Props) {
         ))}
       </nav>
 
-      <div className="p-3 border-t border-gray-100">
-        <Link href="/" className="flex items-center gap-2 text-xs text-gray-400 hover:text-gray-600 transition-colors">
+      <div className="p-3 border-t border-gray-100 space-y-1">
+        <Link href="/" className="flex items-center gap-2 text-xs text-gray-400 hover:text-gray-600 transition-colors px-1 py-1">
           <span>←</span> Public site
         </Link>
+        <form action={signOutAdmin}>
+          <button type="submit" className="flex w-full items-center gap-2 text-xs text-gray-400 hover:text-[#c8102e] transition-colors px-1 py-1">
+            <LogOut size={13} strokeWidth={1.75} /> Sign out
+          </button>
+        </form>
       </div>
     </>
   );
@@ -134,10 +140,15 @@ export function AdminSidebar({ admin, events, currentEventId }: Props) {
           ))}
         </nav>
 
-        <div className="p-3 border-t border-gray-100">
-          <Link href="/" className="flex items-center gap-2 text-xs text-gray-400 hover:text-gray-600 transition-colors">
+        <div className="p-3 border-t border-gray-100 space-y-1">
+          <Link href="/" className="flex items-center gap-2 text-xs text-gray-400 hover:text-gray-600 transition-colors px-1 py-1">
             <span>←</span> Public site
           </Link>
+          <form action={signOutAdmin}>
+            <button type="submit" className="flex w-full items-center gap-2 text-xs text-gray-400 hover:text-[#c8102e] transition-colors px-1 py-1">
+              <LogOut size={13} strokeWidth={1.75} /> Sign out
+            </button>
+          </form>
         </div>
       </aside>
     </>

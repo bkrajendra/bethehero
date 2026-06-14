@@ -77,7 +77,11 @@ function LoginPageInner() {
 
           {(urlError || error) && (
             <p className="text-[#c13515] text-sm text-center">
-              {urlError === "auth_failed" ? "Sign-in failed. Please try again." : error}
+              {urlError === "duplicate_account"
+                ? "This email is already linked to another sign-in method. Please use that method or sign in with your email code below."
+                : urlError === "auth_failed"
+                ? "Sign-in failed. Please try again."
+                : error}
             </p>
           )}
 

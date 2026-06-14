@@ -7,6 +7,15 @@ export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   const next = searchParams.get("next") ?? "/status";
+  const errorCode = searchParams.get("error_code") ?? searchParams.get("error");
+
+  // Supabase sends error params (not a code) when OAuth fails e.g. duplicate account
+  if (errorCode && !code) {
+    const loginPage = next.startsWith("/admin") ? "/admin/login" : "/login";
+    const isDuplicate = (searchParams.get("error_description") ?? "").toLowerCase().includes("multiple");
+    const errorParam = isDuplicate ? "duplicate_account" : "auth_failed";
+    return NextResponse.redirect(`${origin}${loginPage}?error=${errorParam}`);
+  }
 
   if (code) {
     const supabase = await createSupabaseServerClient();
@@ -18,10 +27,12 @@ export async function GET(request: NextRequest) {
     }
 
     if (user?.email) {
-      // Check if this is an admin user
-      const admin = await getAdminByAuthUserId(user.id);
-      if (admin?.active) {
-        return NextResponse.redirect(`${origin}/admin`);
+      // Only route to admin if the login was initiated from the admin context
+      if (next.startsWith("/admin")) {
+        const admin = await getAdminByAuthUserId(user.id);
+        if (admin?.active) {
+          return NextResponse.redirect(`${origin}/admin`);
+        }
       }
 
       const donor = await getDonorByEmail(user.email);

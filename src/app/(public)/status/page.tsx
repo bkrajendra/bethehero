@@ -1,11 +1,13 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { StatusTimeline } from "@/components/StatusTimeline";
 import { DonationCelebration } from "@/components/DonationCelebration";
 import { PushSubscribeCard } from "@/components/PushSubscribeCard";
-import { UserRound, X, Maximize2 } from "lucide-react";
+import { UserRound, X, Maximize2, LogOut } from "lucide-react";
 import Link from "next/link";
+import { signOut } from "@/app/(public)/login/actions";
 
 function QRThumbnail({ qrDataUrl }: { qrDataUrl: string }) {
   const [open, setOpen] = useState(false);
@@ -45,6 +47,20 @@ async function fetchStatus() {
 }
 
 export default function StatusPage() {
+  const router = useRouter();
+
+  // Supabase sometimes sends OAuth errors as hash fragments (e.g. #error=server_error&error_code=...)
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (!hash.includes("error=")) return;
+    const params = new URLSearchParams(hash.slice(1));
+    const desc = params.get("error_description") ?? "";
+    const isDuplicate = desc.toLowerCase().includes("multiple");
+    const errorParam = isDuplicate ? "duplicate_account" : "auth_failed";
+    // Clear the hash and redirect to login with the error
+    router.replace(`/login?error=${errorParam}`);
+  }, [router]);
+
   const { data, isLoading, error } = useQuery({
     queryKey: ["donorStatus"],
     queryFn: fetchStatus,
@@ -87,8 +103,15 @@ export default function StatusPage() {
     <main className="min-h-screen bg-[#f7f7f7] flex items-center justify-center p-6">
       <div className="w-full max-w-sm space-y-3">
 
-        {/* Profile link */}
-        <div className="flex justify-end">
+        {/* Profile link + sign out */}
+        <div className="flex justify-between items-center">
+          <form action={signOut}>
+            <button type="submit"
+              className="inline-flex items-center gap-1.5 text-xs text-[#929292] hover:text-[#c8102e] transition-colors py-1">
+              <LogOut size={13} />
+              Sign out
+            </button>
+          </form>
           <Link href="/profile"
             className="inline-flex items-center gap-1.5 text-xs text-[#6a6a6a] hover:text-[#222222] transition-colors py-1">
             <UserRound size={13} />
