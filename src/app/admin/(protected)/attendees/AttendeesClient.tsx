@@ -66,11 +66,12 @@ function AddDonorDialog() {
       <DialogTrigger render={
         <Button className="bg-[#c8102e] hover:bg-[#a50d27] text-white">+ Add Donor</Button>
       } />
-      <DialogContent className="bg-white border border-gray-100 text-gray-900 max-w-md">
+      <DialogContent className="bg-white border border-gray-100 text-gray-900 max-w-lg">
         <DialogHeader>
           <DialogTitle className="text-gray-900">Add Donor to Event</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 pt-1">
+          {/* Contact */}
           <div className="space-y-1">
             <Label className="text-gray-700 text-sm">Email *</Label>
             <Input name="email" type="email" required placeholder="donor@example.com"
@@ -80,25 +81,43 @@ function AddDonorDialog() {
             <Label className="text-gray-700 text-sm">Full Name *</Label>
             <Input name="fullName" required placeholder="Full name"
               className="border-gray-200 text-gray-900 placeholder:text-gray-300" />
-            <p className="text-xs text-gray-400">Used only if creating a new donor record.</p>
           </div>
+          {/* Personal details */}
           <div className="space-y-1">
-            <Label className="text-gray-700 text-sm">Mobile *</Label>
-            <Input name="mobile" required placeholder="+91 98765 43210"
-              className="border-gray-200 text-gray-900 placeholder:text-gray-300" />
-          </div>
-          <div className="space-y-1">
-            <Label className="text-gray-700 text-sm">Blood Group</Label>
-            <Select name="bloodGroup" defaultValue="">
+            <Label className="text-gray-700 text-sm">Gender</Label>
+            <Select name="gender" defaultValue="">
               <SelectTrigger className="w-full h-9">
-                <SelectValue placeholder="Unknown" />
+                <SelectValue placeholder="Select" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Unknown</SelectItem>
-                {BLOOD_GROUPS.map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}
+                <SelectItem value="">Not specified</SelectItem>
+                <SelectItem value="male">Male</SelectItem>
+                <SelectItem value="female">Female</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
               </SelectContent>
             </Select>
           </div>
+          {/* Org & blood group */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label className="text-gray-700 text-sm">Company</Label>
+              <Input name="company" placeholder="Org / company name"
+                className="border-gray-200 text-gray-900 placeholder:text-gray-300" />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-gray-700 text-sm">Blood Group</Label>
+              <Select name="bloodGroup" defaultValue="">
+                <SelectTrigger className="w-full h-9">
+                  <SelectValue placeholder="Unknown" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Unknown</SelectItem>
+                  {BLOOD_GROUPS.map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <p className="text-xs text-gray-400 -mt-1">Personal details used only when creating a new donor record.</p>
           {error && <p className="text-red-500 text-sm">{error}</p>}
           <Button type="submit" disabled={isPending} className="w-full bg-[#c8102e] hover:bg-[#a50d27] text-white">
             {isPending ? <><Spinner /> Adding…</> : "Add to Event"}

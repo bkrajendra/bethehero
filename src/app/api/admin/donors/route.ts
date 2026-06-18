@@ -72,7 +72,7 @@ export async function PATCH(req: NextRequest) {
     if (action === "update") {
       const schema = z.object({
         fullName: z.string().min(2),
-        mobile: z.string().min(6),
+        mobile: z.string().min(6).optional(),
         gender: z.enum(["male", "female", "other"]).optional().nullable(),
         company: z.string().optional().nullable(),
         bloodGroup: z.enum(VALID_GROUPS).optional().nullable(),
@@ -81,7 +81,7 @@ export async function PATCH(req: NextRequest) {
       const parsed = schema.parse(data);
       const updated = await updateDonorProfile(donorId, {
         fullName: parsed.fullName,
-        mobile: parsed.mobile,
+        mobile: parsed.mobile || "0000000000",
         gender: (parsed.gender || null) as "male" | "female" | "other" | null,
         company: parsed.company || null,
         bloodGroup: (parsed.bloodGroup as typeof VALID_GROUPS[number] | undefined) || null,

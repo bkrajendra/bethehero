@@ -21,9 +21,15 @@ export async function addDonorToEventAction(formData: FormData): Promise<{ error
 
     const email = z.string().email().parse((formData.get("email") as string)?.toLowerCase().trim());
     const fullName = z.string().min(2).parse(formData.get("fullName") as string);
-    const mobile = z.string().min(6).parse(formData.get("mobile") as string);
+    const mobileRaw = (formData.get("mobile") as string)?.trim();
+    const mobile = mobileRaw || "0000000000";
     const bloodGroupRaw = formData.get("bloodGroup") as string;
     const bloodGroup = bloodGroupRaw ? z.enum(VALID_GROUPS).parse(bloodGroupRaw) : null;
+    const dobRaw = formData.get("dob") as string;
+    const dob = dobRaw || null;
+    const genderRaw = formData.get("gender") as string;
+    const gender = genderRaw ? z.enum(["male", "female", "other"]).parse(genderRaw) : null;
+    const company = (formData.get("company") as string)?.trim() || null;
 
     let donor = await getDonorByEmail(email);
     if (!donor) {
@@ -32,6 +38,9 @@ export async function addDonorToEventAction(formData: FormData): Promise<{ error
         fullName,
         mobile,
         bloodGroup: bloodGroup ?? undefined,
+        dob: dob ?? undefined,
+        gender: gender ?? undefined,
+        company: company ?? undefined,
         consentGiven: true,
         consentAt: new Date(),
         consentVersion: "v1.0",
@@ -41,14 +50,18 @@ export async function addDonorToEventAction(formData: FormData): Promise<{ error
     const existing = await getAttendeeByDonorAndEvent(donor.id, settings.currentEventId);
     if (existing) return { error: "Donor is already registered for this event" };
 
-    await createAttendee({
+    const attendee = await createAttendee({
       eventId: settings.currentEventId,
       donorId: donor.id,
       badgeToken: nanoid(24),
-      status: "registered",
+      status: "checked_in",
+      checkedInAt: new Date(),
+      checkedInBy: adminId,
+      ...(bloodGroup ? { bloodGroupAtEvent: bloodGroup } : {}),
     });
 
     await writeAuditLog({ actorAdminId: adminId, action: "add_donor_to_event", targetTable: "event_attendees", targetId: donor.id });
+    await writeAuditLog({ actorAdminId: adminId, action: "check_in", targetTable: "event_attendees", targetId: attendee.id });
     revalidatePath("/admin/attendees");
     return { success: true };
   } catch (e: unknown) {

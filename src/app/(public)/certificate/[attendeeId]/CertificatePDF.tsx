@@ -68,51 +68,51 @@ function CertDocument({ data }: { data: CertData }) {
           <Image src={bgUrl} style={s.bg} />
 
           {/* Layer 1: title */}
-          <Abs top={158} size={21} bold color="#7B1B1B" spacing={1.5}>
-            Certificate of Blood Donation
+          <Abs top={173} size={21} bold color="#7B1B1B" spacing={1.5}>
+            Certificate of Appreciation
           </Abs>
 
           {/* Layer 2: subtitle */}
-          <Abs top={188} size={9} color="#888" spacing={0.3}>
+          <Abs top={210} size={9} color="#888" spacing={0.3}>
             This certifies that the following individual has generously donated blood
           </Abs>
 
           {/* Layer 3: event name & date */}
-          <Abs top={216} left={60} width={W - 120} size={14} bold color="#222">
+          <Abs top={240} left={60} width={W - 120} size={14} bold color="#222">
             {attendee.event.name}
           </Abs>
-          <Abs top={240} size={10} color="#666">
+          <Abs top={260} size={10} color="#666">
             {eventDate}
           </Abs>
 
           {/* Layer 4: donor name — focal element */}
-          <Abs top={278} left={60} width={W - 120} size={30} bold color="#c8102e">
+          <Abs top={300} left={60} width={W - 120} size={30} bold color="#c8102e">
             {attendee.donor.fullName}
           </Abs>
 
           {/* Layer 5: blood group */}
           {attendee.bloodGroupAtEvent ? (
-            <Abs top={326} size={12} color="#8B1A1A">
+            <Abs top={350} size={12} color="#8B1A1A">
               Blood Group: {attendee.bloodGroupAtEvent}
             </Abs>
           ) : null}
 
           {/* Layer 6: company */}
           {attendee.donor.company ? (
-            <Abs top={352} left={60} width={W - 120} size={11} color="#444">
+            <Abs top={378} left={60} width={W - 120} size={11} color="#444">
               {attendee.donor.company}
             </Abs>
           ) : null}
 
           {/* Layer 7: certificate number */}
           {attendee.certificateNumber ? (
-            <Abs top={382} size={8} color="#aaa" spacing={0.5}>
+            <Abs top={410} size={8} color="#aaa" spacing={0.5}>
               Certificate No. {attendee.certificateNumber}
             </Abs>
           ) : null}
 
           {/* Layer 8: signatures — inside the white box at bottom of the background */}
-          <Abs top={485} left={80} width={200} size={9} bold color="#222">
+          {/* <Abs top={485} left={80} width={200} size={9} bold color="#222">
             {attendee.event.organiserSignatoryName}
           </Abs>
           <Abs top={498} left={80} width={200} size={8} color="#666">
@@ -124,7 +124,7 @@ function CertDocument({ data }: { data: CertData }) {
           </Abs>
           <Abs top={498} left={560} width={200} size={8} color="#666">
             {attendee.event.bloodBankSignatoryTitle}
-          </Abs>
+          </Abs> */}
         </View>
       </Page>
     </Document>

@@ -41,7 +41,7 @@ export async function getAttendeesByEvent(eventId: string) {
   return db.query.eventAttendees.findMany({
     where: eq(eventAttendees.eventId, eventId),
     with: { donor: true },
-    orderBy: (a, { asc }) => [asc(a.createdAt)],
+    orderBy: (a, { desc }) => [desc(a.createdAt)],
   });
 }
 
